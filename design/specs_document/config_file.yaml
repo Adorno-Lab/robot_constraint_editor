@@ -1,5 +1,5 @@
 vfi_file_version: 2
-zero_index: false
+zero_indexed: false
 vfi_array:
     -
         vfi_type: "ENVIRONMENT_TO_ROBOT"
@@ -11,7 +11,7 @@ vfi_array:
         joint_index: 1
         safe_distance: 0.180625
         vfi_gain: 1.0
-        direction: "FORBIDDEN_ZONE"
+        direction: "RESTRICTED_ZONE"
         tag: "C1"
     -       
         vfi_type: "ROBOT_TO_ROBOT"
@@ -25,7 +25,7 @@ vfi_array:
         joint_index_two: 1
         safe_distance: 0.16
         vfi_gain: 1.0
-        direction: "FORBIDDEN_ZONE"  
+        direction: "RESTRICTED_ZONE" 
         tag: "C2"
     -
         vfi_type: "ROBOT_TO_ROBOT"
@@ -39,6 +39,6 @@ vfi_array:
         joint_index_two: 7
         safe_distance: 0.01
         vfi_gain: 1.0
-        direction: "KEEP_ROBOT_OUTSIDE"     
+        direction: "RESTRICTED_ZONE"    
         tag: "C3"  
 
