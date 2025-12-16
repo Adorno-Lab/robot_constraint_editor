@@ -231,7 +231,18 @@ Some type of primitives could require more than one CoppeliaSim object to be des
  first,
  the object that defines the line,
  and then the objects representing the two points on the line.
- 
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-of-a-complete-config-file"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+ shows a complete example.
 \end_layout
 
 \begin_layout Standard
@@ -1665,7 +1676,14 @@ literal "false"
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Example of a complete configuration file
+Example of a complete configuration file.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Example-of-a-complete-config-file"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
