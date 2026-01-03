@@ -24,6 +24,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <variant>
 
 namespace DQ_robotics_extensions
 {
@@ -31,15 +32,29 @@ namespace DQ_robotics_extensions
 class VFIConfigurationFile
 {
 public:
-    struct RAW_DATA{
+
+    struct ENVIRONMENT_TO_ROBOT_RAW_DATA{
         std::string vfi_type;
-        std::string cs_entity_environment_or_cs_entity_one;
-        std::string cs_entity_robot_or_cs_entity_two;
-        std::string entity_environment_or_one_primitive_type;
-        std::string entity_robot_or_two_primitive_type;
-        int robot_index_or_robot_index_one;
+        std::vector<std::string> cs_entity_environment;
+        std::vector<std::string> cs_entity_robot;
+        std::string entity_environment_primitive_type;
+        std::string entity_robot_primitive_type;
+        int robot_index;
+        int joint_index;
+        double safe_distance;
+        double vfi_gain;
+        std::string direction;
+        std::string tag;
+    };
+    struct ROBOT_TO_ROBOT_RAW_DATA{
+        std::string vfi_type;
+        std::vector<std::string> cs_entity_one;
+        std::vector<std::string> cs_entity_two;
+        std::string entity_one_primitive_type;
+        std::string entity_two_primitive_type;
+        int robot_index_one;
         int robot_index_two;
-        int joint_index_or_joint_index_one;
+        int joint_index_one;
         int joint_index_two;
         double safe_distance;
         double vfi_gain;
@@ -47,12 +62,16 @@ public:
         std::string tag;
     };
 
+    using RawData= std::variant<ENVIRONMENT_TO_ROBOT_RAW_DATA, ROBOT_TO_ROBOT_RAW_DATA>;
+
 protected:
-    VFIConfigurationFile();
+    VFIConfigurationFile() = default;
 
 public:
     virtual ~VFIConfigurationFile() = default;
-    virtual std::vector<RAW_DATA> get_raw_data() = 0;
+
+
+    virtual std::vector<RawData>  get_raw_data() = 0;
 };
 
 
