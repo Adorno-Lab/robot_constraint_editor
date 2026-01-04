@@ -21,7 +21,7 @@
 # ################################################################
 */
 
-#include "vfi_configuration_file_yaml.hpp"
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
 #include <iomanip>

@@ -24,7 +24,7 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "vfi_configuration_file.hpp"
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file.hpp>
 
 namespace DQ_robotics_extensions
 {

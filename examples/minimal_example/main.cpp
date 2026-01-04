@@ -1,5 +1,5 @@
-#include "vfi_configuration_file_yaml.hpp"
 
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
 
 using namespace DQ_robotics_extensions;
 
