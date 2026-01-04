@@ -76,7 +76,18 @@ public:
      */
     virtual std::vector<RawData>  get_raw_data() = 0;
 
+    /**
+     * @brief get_vfi_file_version gets the vfi_file_version data from
+     *              the YAML file.
+     * @return The desired data.
+     */
     virtual int get_vfi_file_version() = 0;
+
+    /**
+     * @brief get_zero_indexed_status gets the zero_indexed data from
+     *          the YAML file.
+     * @return The desired data.
+     */
     virtual bool get_zero_indexed_status() = 0;
 };
 
