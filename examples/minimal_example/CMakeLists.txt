@@ -38,6 +38,7 @@ include_directories(${PROJECT_NAME}  include)
 include_directories(../../include)
 add_library(vfi_config_yaml
            ../../src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.cpp
+           ../../src/dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.cpp
 )
 
 add_executable(${PROJECT_NAME} main.cpp
