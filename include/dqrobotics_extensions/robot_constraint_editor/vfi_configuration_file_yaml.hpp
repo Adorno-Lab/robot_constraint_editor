@@ -37,10 +37,15 @@ private:
     std::vector<RawData> raw_data_;
 public:
     ~VFIConfigurationFileYaml() = default;
-
-    std::vector<RawData> get_raw_data() override;
     VFIConfigurationFileYaml(const std::string& config_file);
 
+    // Override from VFIConfigurationFile
+    std::vector<RawData> get_raw_data() override;
+    int get_vfi_file_version() override;
+    bool get_zero_indexed_status() override;
+
+
+    // Exclusive methods
     void show_raw_data(const std::vector<RawData>& raw_data);
 
 };

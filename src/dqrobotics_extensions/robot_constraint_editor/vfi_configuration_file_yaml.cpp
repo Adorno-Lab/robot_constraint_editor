@@ -34,10 +34,22 @@ class VFIConfigurationFileYaml::Impl
 public:
     YAML::Node config_;
     std::string config_file_;
+    int vfi_file_version_ = 2; // default value
+    bool zero_indexed_ = true; // default value
     Impl()
     {
 
     };
+
+    /**
+     * @brief bool2string convert a boolean to string
+     * @param flag The boolean to convert
+     * @return "true" or "false" according to the flag.
+     */
+    std::string bool2string(const bool& flag)
+    {
+        return flag == true ? std::string("true") : std::string("false");
+    }
 
 
     /**
@@ -83,6 +95,8 @@ public:
         std::cout << "║       VFI Configuration File Parser - C++17         ║" << std::endl;
         std::cout << "╚══════════════════════════════════════════════════════╝" << std::endl;
         std::cout << "\n==========================================" << std::endl;
+        std::cout << "VFI_FILE_VERSION: " << vfi_file_version_ << std::endl;
+        std::cout << "Zero Indexed: " + bool2string(zero_indexed_) << std::endl;
         std::cout << "RAW DATA LOG (" << raw_data.size() << " items)" << std::endl;
         std::cout << "==========================================" << std::endl;
 
@@ -162,9 +176,24 @@ void VFIConfigurationFileYaml::_extract_yaml_data()
 {
     try {
         impl_->config_ = YAML::LoadFile(impl_->config_file_);
-        const YAML::Node& vfi_file_version = impl_->config_["vfi_file_version"]; //Aliasing
-        const YAML::Node& zero_indexed = impl_->config_["zero_indexed"]; //Aliasing
+
+        if (impl_->config_["vfi_file_version"])
+            impl_->vfi_file_version_ = impl_->config_["vfi_file_version"].as<int>();
+        else
+            std::cerr << "Warning: vfi_file_version not found, using default: "
+                      << impl_->vfi_file_version_ << std::endl;
+
+
+        if (impl_->config_["zero_indexed"])
+            impl_->zero_indexed_ = impl_->config_["zero_indexed"].as<bool>();
+        else
+            std::cerr << "Warning: zero_indexed not found, using default: " + impl_->bool2string(impl_->zero_indexed_)<< std::endl;
+
+
+
         const YAML::Node& vfi_array = impl_->config_["vfi_array"]; //Aliasing
+
+
 
         for (const auto& parameter : vfi_array) {
             try {
@@ -245,6 +274,26 @@ std::vector<VFIConfigurationFile::RawData> VFIConfigurationFileYaml::get_raw_dat
 void VFIConfigurationFileYaml::show_raw_data(const std::vector<RawData>& raw_data)
 {
     impl_->log_complete_raw_data(raw_data);
+}
+
+/**
+ * @brief VFIConfigurationFileYaml::get_vfi_file_version gets the vfi_file_version data from
+ *              the YAML file.
+ * @return The desired data.
+ */
+int VFIConfigurationFileYaml::get_vfi_file_version()
+{
+    return impl_->vfi_file_version_;
+}
+
+/**
+ * @brief VFIConfigurationFileYaml::get_zero_indexed_status gets the zero_indexed data from
+ *          the YAML file.
+ * @return The desired data.
+ */
+bool VFIConfigurationFileYaml::get_zero_indexed_status()
+{
+    return impl_->zero_indexed_;
 }
 
 }

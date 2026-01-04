@@ -75,6 +75,9 @@ public:
      * @return A raw data vector.
      */
     virtual std::vector<RawData>  get_raw_data() = 0;
+
+    virtual int get_vfi_file_version() = 0;
+    virtual bool get_zero_indexed_status() = 0;
 };
 
 
