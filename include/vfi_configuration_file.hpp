@@ -70,7 +70,10 @@ protected:
 public:
     virtual ~VFIConfigurationFile() = default;
 
-
+    /**
+     * @brief get_raw_data gets the raw data vector from a YAML file.
+     * @return A raw data vector.
+     */
     virtual std::vector<RawData>  get_raw_data() = 0;
 };
 
