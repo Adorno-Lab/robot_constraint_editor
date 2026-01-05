@@ -29,6 +29,11 @@ jobs:
           cmake -DYAML_BUILD_SHARED_LIBS=on ..
           make
           sudo make install
+      
+      - name: Build this project using the script available in dqrobotics/cpp
+        run: | 
+          git clone https://github.com/dqrobotics/cpp
+          sh ./cpp/.github/scripts/macos/build.sh    
           
       - name: Build tests
         run: |
