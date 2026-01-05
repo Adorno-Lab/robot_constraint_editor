@@ -30,10 +30,13 @@ jobs:
           make
           sudo make install
       
-      - name: Build this project using the script available in dqrobotics/cpp
+      - name: Build this project
         run: | 
           git clone https://github.com/dqrobotics/cpp
           sh ./cpp/.github/scripts/macos/build.sh    
+
+      - name: Install this project 
+        run: sh ./cpp/.github/scripts/macos/install.sh    
           
       - name: Build tests
         run: |
