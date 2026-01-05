@@ -6,34 +6,30 @@
 #include <map>
 #include <fstream>
 
+
+
+
 namespace DQ_robotics_extensions
 {
+
+
 
 class RobotConstraintEditor::Impl
 {
 public:
-    enum class VFI_TYPE{
-        ENVIRONMENT_TO_ROBOT,
-        ROBOT_TO_ROBOT
-    };
-public:
     YAML::Node config_;
-    //Sstd::string config_file_;
-    int vfi_file_version_ = 2; // default value
+    const int vfi_file_version_ = 2; // default value
     bool zero_indexed_ = true; // default value
     std::shared_ptr<VFIConfigurationFileYaml> vfi_config_file_yaml_;
 
     std::map<std::string, VFIConfigurationFile::RawData> yaml_raw_data_map_;
 
-    VFI_TYPE _get_vfi_type(const VFIConfigurationFile::RawData& data)
+    bool _is_the_same_type(const VFIConfigurationFile::RawData& data1, const VFIConfigurationFile::RawData& data2)
     {
-        if (std::holds_alternative<VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_RAW_DATA>(data))
-            return VFI_TYPE::ENVIRONMENT_TO_ROBOT;
-        else if (std::holds_alternative<VFIConfigurationFile::ROBOT_TO_ROBOT_RAW_DATA>(data))
-            return  VFI_TYPE::ROBOT_TO_ROBOT;
-        else
-            throw std::runtime_error("Unsupported VFI TYPE!");
+            return data1.index() == data2.index();
     }
+
+
 
     std::vector<VFIConfigurationFile::RawData> _load_data_from_yaml_file(const std::string& config_file)
     {
@@ -80,14 +76,6 @@ void RobotConstraintEditor::replace_data(const std::string& tag, const VFIConfig
     if (impl_->vfi_config_file_yaml_)
     {
         try{
-            // Check if tag exists
-            if (!impl_->is_tag_in_map(tag))
-                throw std::runtime_error("Tag '" + tag + "' not found!");
-
-            auto current_data = impl_->yaml_raw_data_map_.at(tag);
-            if (impl_->_get_vfi_type(current_data) != impl_->_get_vfi_type(data))
-                throw std::runtime_error("The new data has a different VFI type from the current one!");
-
             remove_data(tag);
             add_data(data);
         } catch (const std::runtime_error& e) {
@@ -95,7 +83,8 @@ void RobotConstraintEditor::replace_data(const std::string& tag, const VFIConfig
             throw std::runtime_error("RobotConstraintEditor::edit_data: Fail to update the VFI data!");
         }
 
-    }
+    }else
+        throw std::runtime_error("There is no any data to replace!");
 }
 
 void RobotConstraintEditor::add_data(const VFIConfigurationFile::RawData& data)
@@ -112,6 +101,115 @@ void RobotConstraintEditor::remove_data(const std::string& tag)
         throw std::runtime_error("Tag '" + tag + "' not found!");
     impl_->yaml_raw_data_map_.erase(tag);
 }
+
+void RobotConstraintEditor::edit_data(const std::string& tag, const std::string& key, const int& value)
+{
+    // Check if tag exists
+    if (!impl_->is_tag_in_map(tag))
+        throw std::runtime_error("Tag '" + tag + "' not found!");
+
+    auto& raw_data = impl_->yaml_raw_data_map_.at(tag);
+
+}
+/*
+void RobotConstraintEditor::edit_data(const std::string& tag, const std::string& key, const auto& value)
+{
+    // Check if tag exists
+    if (!impl_->is_tag_in_map(tag))
+        throw std::runtime_error("Tag '" + tag + "' not found!");
+
+    auto& raw_data = impl_->yaml_raw_data_map_.at(tag);
+    bool modified = false;
+
+    std::visit([&](auto&& arg) {
+        using DataType = std::decay_t<decltype(arg)>;
+
+        // Type-checked assignment
+
+
+        if constexpr (std::is_same_v<DataType, VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_RAW_DATA>) {
+            // Check each field
+            if (assign_with_type_check(arg.vfi_type, "vfi_type")) modified = true;
+            else if (assign_with_type_check(arg.cs_entity_environment, "cs_entity_environment")) modified = true;
+            else if (assign_with_type_check(arg.cs_entity_robot, "cs_entity_robot")) modified = true;
+            else if (assign_with_type_check(arg.entity_environment_primitive_type, "entity_environment_primitive_type")) modified = true;
+            else if (assign_with_type_check(arg.entity_robot_primitive_type, "entity_robot_primitive_type")) modified = true;
+            else if (assign_with_type_check(arg.robot_index, "robot_index")) modified = true;
+            else if (assign_with_type_check(arg.joint_index, "joint_index")) modified = true;
+            else if (assign_with_type_check(arg.safe_distance, "safe_distance")) modified = true;
+            else if (assign_with_type_check(arg.vfi_gain, "vfi_gain")) modified = true;
+            else if (assign_with_type_check(arg.direction, "direction")) modified = true;
+
+            // Special handling for tag
+            else if (key == "tag") {
+                if constexpr (VFIVectorField<decltype(value)>) {
+                    throw std::runtime_error("Tag cannot be a vector");
+                } else {
+                    std::string old_tag = arg.tag;
+                    if (assign_with_type_check(arg.tag, "tag")) {
+                        // Update map key
+                        auto node_handler = impl_->yaml_raw_data_map_.extract(old_tag);
+                        if (!node_handler.empty()) {
+                            node_handler.key() = value;
+                            impl_->yaml_raw_data_map_.insert(std::move(node_handler));
+                        }
+                        modified = true;
+                    }
+                }
+            }
+
+        } else if constexpr (std::is_same_v<DataType, VFIConfigurationFile::ROBOT_TO_ROBOT_RAW_DATA>) {
+            // Similar for ROBOT_TO_ROBOT
+            if (assign_with_type_check(arg.vfi_type, "vfi_type")) modified = true;
+            else if (assign_with_type_check(arg.cs_entity_one, "cs_entity_one")) modified = true;
+            else if (assign_with_type_check(arg.cs_entity_two, "cs_entity_two")) modified = true;
+            else if (assign_with_type_check(arg.entity_one_primitive_type, "entity_one_primitive_type")) modified = true;
+            else if (assign_with_type_check(arg.entity_two_primitive_type, "entity_two_primitive_type")) modified = true;
+            else if (assign_with_type_check(arg.robot_index_one, "robot_index_one")) modified = true;
+            else if (assign_with_type_check(arg.robot_index_two, "robot_index_two")) modified = true;
+            else if (assign_with_type_check(arg.joint_index_one, "joint_index_one")) modified = true;
+            else if (assign_with_type_check(arg.joint_index_two, "joint_index_two")) modified = true;
+            else if (assign_with_type_check(arg.safe_distance, "safe_distance")) modified = true;
+            else if (assign_with_type_check(arg.vfi_gain, "vfi_gain")) modified = true;
+            else if (assign_with_type_check(arg.direction, "direction")) modified = true;
+
+            // Special handling for tag
+            else if (key == "tag") {
+                if constexpr (VFIVectorField<decltype(value)>) {
+                    throw std::runtime_error("Tag cannot be a vector");
+                } else {
+                    std::string old_tag = arg.tag;
+                    if (assign_with_type_check(arg.tag, "tag")) {
+                        // Update map key
+                        auto node_handler = impl_->yaml_raw_data_map_.extract(old_tag);
+                        if (!node_handler.empty()) {
+                            node_handler.key() = value;
+                            impl_->yaml_raw_data_map_.insert(std::move(node_handler));
+                        }
+                        modified = true;
+                    }
+                }
+            }
+        }
+    }, raw_data);
+
+    if (!modified) {
+        throw std::runtime_error("Key '" + key + "' not found for tag '" + tag + "'");
+    }
+
+    // Validation
+    /*
+    if (!is_data_valid(raw_data)) {
+        auto errors = get_data_validation_errors(raw_data);
+        std::string error_msg = "Edit makes data invalid. Errors:\n";
+        for (const auto& err : errors) {
+            error_msg += "  - " + err + "\n";
+        }
+        throw std::runtime_error(error_msg);
+    }
+
+}
+*/
 
 void RobotConstraintEditor::save_data(const std::string& path_config_file,
                                       const int &vfi_file_version,

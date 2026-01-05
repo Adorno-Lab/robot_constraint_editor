@@ -34,13 +34,16 @@ int main()
     data.tag = "TAG_X1";
     rce.add_data(data);
 
+    //----Edit a constraint
+    rce.edit_data("C3", "robot_index_one", 11.0);
+
    rce.save_data("config_file2.yaml", 2, false);
 
 
 
     //------------------------------
 
-    ri.show_raw_data(rce.get_raw_data(), ri.get_vfi_file_version(), ri.get_zero_indexed_status());
+    //ri.show_raw_data(rce.get_raw_data(), ri.get_vfi_file_version(), ri.get_zero_indexed_status());
 
     return 0;
 }

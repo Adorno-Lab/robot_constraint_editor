@@ -47,6 +47,10 @@ public:
                    const int& vfi_file_version,
                    const bool& zero_indexed);
 
+
+    void edit_data(const std::string& tag, const std::string& key, const int& value);
+
+
     std::vector<VFIConfigurationFile::RawData> get_raw_data();
 };
 }
