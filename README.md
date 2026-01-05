@@ -3,6 +3,23 @@
 # robot_constraint_editor
 A graphical editor to create and manage configuration files for the [robot_constraint_manager](https://github.com/Adorno-Lab/robot_constraint_manager)
 
-TODO
 
-- [] Provide instructions to compile.
+### Prerequisites 
+
+#### [Yaml-cpp](https://github.com/jbeder/yaml-cpp)
+
+Ubuntu:
+```shell
+cd ~/Downloads && git clone https://github.com/jbeder/yaml-cpp
+cd ~/Downloads/yaml-cpp
+mkdir -p build && cd build
+cmake -DYAML_BUILD_SHARED_LIBS=on ..
+make
+sudo make install
+```
+macOS:
+
+```
+brew update
+brew install yaml-cpp
+```
