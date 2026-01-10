@@ -24,7 +24,6 @@
 #include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
 #include <filesystem>
 #include <iostream>
-#include <yaml-cpp/yaml.h>
 #include <map>
 #include <fstream>
 
@@ -45,10 +44,8 @@ template void RobotConstraintEditor::edit_data<std::vector<std::string>>(const s
 class RobotConstraintEditor::Impl
 {
 public:
-    YAML::Node config_;
     const int vfi_file_version_ = 2; // default value
     bool zero_indexed_ = true; // default value
-    //std::shared_ptr<VFIConfigurationFileYaml> vfi_config_file_yaml_;
 
     std::map<std::string, VFIConfigurationFile::RawData> yaml_raw_data_map_;
 
