@@ -9,12 +9,12 @@ using namespace DQ_robotics_extensions;
 int main()
 {
     auto ri = VFIConfigurationFileYaml("config_file.yaml");
-    VFIConfigurationFileRawData::show_data(ri.get_raw_data(), ri.get_vfi_file_version(), ri.get_zero_indexed_status());
-
+    //VFIConfigurationFileRawData::show_data(ri.get_raw_data(), ri.get_vfi_file_version(), ri.get_zero_indexed_status());
+    auto yaml_data = ri.get_raw_data();
     //-- Edit the YAML file-----
 
     auto rce = RobotConstraintEditor();
-    rce.load_data("config_file.yaml");
+    //rce.add_data(yaml_data);
 
 
     // Add a new constraint---------
@@ -35,7 +35,7 @@ int main()
     rce.add_data(data);
 
     //----Edit a constraint
-    rce.edit_data("C3", "tag", std::string("C33"));
+   //rce.edit_data("C3", "tag", std::string("C33"));
 
 
     rce.save_data("config_file2.yaml", 2, false);

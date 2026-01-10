@@ -39,7 +39,7 @@ private:
 public:
     RobotConstraintEditor();
 
-    void load_data(const std::string& config_file);
+    void add_data(const std::vector<VFIConfigurationFile::RawData>& vector_data);
     void add_data(const VFIConfigurationFile::RawData& data);
     void remove_data(const std::string& tag);
     void replace_data(const std::string& tag, const VFIConfigurationFile::RawData& data);

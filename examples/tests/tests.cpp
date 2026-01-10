@@ -14,7 +14,7 @@ int main()
     //-- Edit the YAML file-----
 
     auto rce = RobotConstraintEditor();
-    rce.load_data("config_file.yaml");
+    rce.add_data(ri.get_raw_data());
 
 
     // Add a new constraint---------
