@@ -70,10 +70,10 @@ public:
     virtual ~VFIConfigurationFile() = default;
 
     /**
-     * @brief read_data reads a configuration file.
+     * @brief load_data loads a configuration file.
      * @param config_file The name of the file including its path and format.
      */
-    virtual void read_data(const std::string& config_file) = 0;
+    virtual void load_data(const std::string& config_file) = 0;
 
     /**
      * @brief get_data gets the vector that contains the VFI configurations.
@@ -97,9 +97,14 @@ public:
     /**
      * @brief save_data saves a configuration file containing the VFI constraints.
      * @param data the vector that contains the VFI configurations
-     * @param The desired name of the file including its path and format.
+     * @param vfi_file_version The desired format version
+     * @param zero_indexed To define if the data uses a zero-indexed convention.
+     * @param config_file The desired name of the file including its path and format.
      */
-    virtual void save_data(const std::vector<Data>& data, const std::string& config_file) = 0;
+    virtual void save_data(const std::vector<Data>& data,
+                           const int& vfi_file_version,
+                           const bool& zero_indexed,
+                           const std::string& config_file) = 0;
 
 };
 

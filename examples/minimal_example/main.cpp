@@ -10,7 +10,7 @@ int main()
 {
     // This is to test the VFIConfigurationFileYaml //
     auto ri = std::make_shared<VFIConfigurationFileYaml>();
-    ri->read_data("config_file.yaml");
+    ri->load_data("config_file.yaml");
     VFIConfigurationFileData::show_data(ri->get_data(), ri->get_vfi_file_version(), ri->is_zero_indexed());
     //auto yaml_data = ri.get_raw_data();
     //-- Edit the YAML file-----
@@ -39,7 +39,7 @@ int main()
     rce.add_data(data);
 
     //----Edit a constraint
-   //rce.edit_data("C3", "tag", std::string("C33"));
+    rce.edit_data("C3", "tag", std::string("C33"));
 
 
     rce.save_data("config_file2.yaml", 2, false);
@@ -48,7 +48,6 @@ int main()
 
     //------------------------------
 
-    //ri.show_raw_data(rce.get_raw_data(), ri.get_vfi_file_version(), ri.get_zero_indexed_status());
 
     return 0;
 }
