@@ -36,7 +36,7 @@ public:
     std::string config_file_;
     int vfi_file_version_ = 2; // default value
     bool zero_indexed_ = true; // default value
-    std::vector<RawData> raw_data_;
+    std::vector<Data> raw_data_;
     Impl()
     {
 
@@ -66,6 +66,7 @@ public:
      */
     void _extract_yaml_data()
     {
+        raw_data_.clear();
         try {
             config_ = YAML::LoadFile(config_file_);
 
@@ -92,7 +93,7 @@ public:
                     std::string vfi_type = parameter["vfi_type"].as<std::string>();
 
                     if (vfi_type == "ENVIRONMENT_TO_ROBOT") {
-                        ENVIRONMENT_TO_ROBOT_RAW_DATA env_data;
+                        ENVIRONMENT_TO_ROBOT_DATA env_data;
                         env_data.vfi_type = vfi_type;
                         env_data.cs_entity_environment  = get_vector_list(parameter["cs_entity_environment"],
                                                                                 "cs_entity_environment");
@@ -109,7 +110,7 @@ public:
                         raw_data_.push_back(env_data);
 
                     }else if (vfi_type == "ROBOT_TO_ROBOT") {
-                        ROBOT_TO_ROBOT_RAW_DATA robot_data;
+                        ROBOT_TO_ROBOT_DATA robot_data;
                         robot_data.vfi_type = vfi_type;
                         robot_data.cs_entity_one  = get_vector_list(parameter["cs_entity_one"],
                                                                           "cs_entity_one");
@@ -156,13 +157,22 @@ public:
  * @param config_file The configuration YAML file. This path must contain the file and its format.
  *                    Example: "/path_to_the_file/config_file.yaml"
  */
-VFIConfigurationFileYaml::VFIConfigurationFileYaml(const std::string& config_file)
+VFIConfigurationFileYaml::VFIConfigurationFileYaml()
 {
     impl_ = std::make_shared<VFIConfigurationFileYaml::Impl>();
+    //impl_->config_file_ = config_file;
+    //impl_->_extract_yaml_data();
+}
+
+/**
+ * @brief VFIConfigurationFileYaml::read_data reads a configuration file.
+ * @param config_file The name of the file including its path and format.
+ */
+void VFIConfigurationFileYaml::read_data(const std::string& config_file)
+{
     impl_->config_file_ = config_file;
     impl_->_extract_yaml_data();
 }
-
 
 
 
@@ -170,8 +180,10 @@ VFIConfigurationFileYaml::VFIConfigurationFileYaml(const std::string& config_fil
  * @brief VFIConfigurationFileYaml::get_raw_data gets the raw data vector from a YAML file.
  * @return A raw data vector.
  */
-std::vector<VFIConfigurationFile::RawData> VFIConfigurationFileYaml::get_raw_data()
+std::vector<VFIConfigurationFile::Data> VFIConfigurationFileYaml::get_data() const
 {
+    if (impl_->raw_data_.empty())
+        throw std::runtime_error("The vector data is empty!");
     return impl_->raw_data_;
 }
 
@@ -181,19 +193,32 @@ std::vector<VFIConfigurationFile::RawData> VFIConfigurationFileYaml::get_raw_dat
  *              the YAML file.
  * @return The desired data.
  */
-int VFIConfigurationFileYaml::get_vfi_file_version()
+int VFIConfigurationFileYaml::get_vfi_file_version() const
 {
     return impl_->vfi_file_version_;
 }
 
+
 /**
- * @brief VFIConfigurationFileYaml::get_zero_indexed_status gets the zero_indexed data from
- *          the YAML file.
- * @return The desired data.
+ * @brief VFIConfigurationFileYaml::is_zero_indexed.
+ * @return Returns true if the configuration file uses a zero-indexed convention to
+ *         describe the joint and robot indexes. False otherwise.
  */
-bool VFIConfigurationFileYaml::get_zero_indexed_status()
+bool VFIConfigurationFileYaml::is_zero_indexed() const
 {
     return impl_->zero_indexed_;
 }
+
+/**
+ * @brief VFIConfigurationFileYaml::save_data saves a configuration file containing the VFI constraints.
+ * @param data the vector that contains the VFI configurations
+ * @param The desired name of the file including its path and format.
+ */
+void VFIConfigurationFileYaml::save_data(const std::vector<VFIConfigurationFile::Data> &data,
+                                         const std::string &config_file)
+{
+
+}
+
 
 }
