@@ -37,12 +37,13 @@ private:
     std::shared_ptr<Impl> impl_;
 
 public:
-    RobotConstraintEditor();
+    RobotConstraintEditor(const std::shared_ptr<VFIConfigurationFile>& interface);
 
-    void add_data(const std::vector<VFIConfigurationFile::RawData>& vector_data);
-    void add_data(const VFIConfigurationFile::RawData& data);
+    void load_data(const std::string& config_file);
+    void add_data(const std::vector<VFIConfigurationFile::Data>& vector_data);
+    void add_data(const VFIConfigurationFile::Data& data);
     void remove_data(const std::string& tag);
-    void replace_data(const std::string& tag, const VFIConfigurationFile::RawData& data);
+    void replace_data(const std::string& tag, const VFIConfigurationFile::Data& data);
     void save_data(const std::string& path_config_file,
                    const int& vfi_file_version,
                    const bool& zero_indexed);
@@ -52,6 +53,6 @@ public:
     void edit_data(const std::string& tag, const std::string& key, const T& value);
 
 
-    std::vector<VFIConfigurationFile::RawData> get_raw_data();
+    std::vector<VFIConfigurationFile::Data> get_data();
 };
 }

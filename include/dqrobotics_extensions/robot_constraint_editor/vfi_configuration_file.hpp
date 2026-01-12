@@ -33,21 +33,24 @@ class VFIConfigurationFile
 {
 public:
 
-    struct ENVIRONMENT_TO_ROBOT_RAW_DATA{
+    struct BASE_DATA{
         std::string vfi_type;
+        double safe_distance;
+        double vfi_gain;
+        std::string direction;
+        std::string tag;
+
+    };
+    struct ENVIRONMENT_TO_ROBOT_DATA : BASE_DATA{
         std::vector<std::string> cs_entity_environment;
         std::vector<std::string> cs_entity_robot;
         std::string entity_environment_primitive_type;
         std::string entity_robot_primitive_type;
         int robot_index;
         int joint_index;
-        double safe_distance;
-        double vfi_gain;
-        std::string direction;
-        std::string tag;
+
     };
-    struct ROBOT_TO_ROBOT_RAW_DATA{
-        std::string vfi_type;
+    struct ROBOT_TO_ROBOT_DATA : BASE_DATA{
         std::vector<std::string> cs_entity_one;
         std::vector<std::string> cs_entity_two;
         std::string entity_one_primitive_type;
@@ -56,13 +59,9 @@ public:
         int robot_index_two;
         int joint_index_one;
         int joint_index_two;
-        double safe_distance;
-        double vfi_gain;
-        std::string direction;
-        std::string tag;
     };
 
-    using RawData = std::variant<ENVIRONMENT_TO_ROBOT_RAW_DATA, ROBOT_TO_ROBOT_RAW_DATA>;
+    using Data = std::variant<ENVIRONMENT_TO_ROBOT_DATA, ROBOT_TO_ROBOT_DATA>;
 
 protected:
     VFIConfigurationFile() = default;
@@ -71,25 +70,41 @@ public:
     virtual ~VFIConfigurationFile() = default;
 
     /**
-     * @brief get_raw_data gets the raw data vector from a YAML file.
-     * @return A raw data vector.
+     * @brief load_data loads a configuration file.
+     * @param config_file The name of the file including its path and format.
      */
-    virtual std::vector<RawData>  get_raw_data() = 0;
+    virtual void load_data(const std::string& config_file) = 0;
 
     /**
-     * @brief get_vfi_file_version gets the vfi_file_version data from
-     *              the YAML file.
-     * @return The desired data.
+     * @brief get_data gets the vector that contains the VFI configurations.
+     * @return The desired data vector.
      */
-    virtual int get_vfi_file_version() = 0;
+    virtual std::vector<Data>  get_data() const = 0;
 
     /**
-     * @brief get_zero_indexed_status gets the zero_indexed data from
-     *          the YAML file.
-     * @return The desired data.
+     * @brief get_vfi_file_version gets the configuration file version.
+     * @return The desired file version.
      */
-    virtual bool get_zero_indexed_status() = 0;
+    virtual int get_vfi_file_version() const = 0;
 
+    /**
+     * @brief is_zero_indexed.
+     * @return Returns true if the configuration file uses a zero-indexed convention to
+     *         describe the joint and robot indexes. False otherwise.
+     */
+    virtual bool is_zero_indexed() const = 0;
+
+    /**
+     * @brief save_data saves a configuration file containing the VFI constraints.
+     * @param data the vector that contains the VFI configurations
+     * @param vfi_file_version The desired format version
+     * @param zero_indexed To define if the data uses a zero-indexed convention.
+     * @param config_file The desired name of the file including its path and format.
+     */
+    virtual void save_data(const std::vector<Data>& data,
+                           const int& vfi_file_version,
+                           const bool& zero_indexed,
+                           const std::string& config_file) = 0;
 
 };
 

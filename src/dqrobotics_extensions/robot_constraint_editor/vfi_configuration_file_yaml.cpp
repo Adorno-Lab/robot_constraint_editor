@@ -23,6 +23,8 @@
 
 #include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include <dqrobotics_extensions/robot_constraint_editor/utils.hpp>
 
@@ -36,7 +38,7 @@ public:
     std::string config_file_;
     int vfi_file_version_ = 2; // default value
     bool zero_indexed_ = true; // default value
-    std::vector<RawData> raw_data_;
+    std::vector<Data> raw_data_;
     Impl()
     {
 
@@ -66,6 +68,7 @@ public:
      */
     void _extract_yaml_data()
     {
+        raw_data_.clear();
         try {
             config_ = YAML::LoadFile(config_file_);
 
@@ -92,7 +95,7 @@ public:
                     std::string vfi_type = parameter["vfi_type"].as<std::string>();
 
                     if (vfi_type == "ENVIRONMENT_TO_ROBOT") {
-                        ENVIRONMENT_TO_ROBOT_RAW_DATA env_data;
+                        ENVIRONMENT_TO_ROBOT_DATA env_data;
                         env_data.vfi_type = vfi_type;
                         env_data.cs_entity_environment  = get_vector_list(parameter["cs_entity_environment"],
                                                                                 "cs_entity_environment");
@@ -109,12 +112,12 @@ public:
                         raw_data_.push_back(env_data);
 
                     }else if (vfi_type == "ROBOT_TO_ROBOT") {
-                        ROBOT_TO_ROBOT_RAW_DATA robot_data;
+                        ROBOT_TO_ROBOT_DATA robot_data;
                         robot_data.vfi_type = vfi_type;
                         robot_data.cs_entity_one  = get_vector_list(parameter["cs_entity_one"],
                                                                           "cs_entity_one");
                         robot_data.cs_entity_two = get_vector_list(parameter["cs_entity_two"],
-                                                                          "cs_entity_robot");
+                                                                          "cs_entity_two");
                         robot_data.entity_one_primitive_type = parameter["entity_one_primitive_type"].as<std::string>();
                         robot_data.entity_two_primitive_type = parameter["entity_two_primitive_type"].as<std::string>();
                         robot_data.robot_index_one = parameter["robot_index_one"].as<int>();
@@ -156,13 +159,22 @@ public:
  * @param config_file The configuration YAML file. This path must contain the file and its format.
  *                    Example: "/path_to_the_file/config_file.yaml"
  */
-VFIConfigurationFileYaml::VFIConfigurationFileYaml(const std::string& config_file)
+VFIConfigurationFileYaml::VFIConfigurationFileYaml()
 {
     impl_ = std::make_shared<VFIConfigurationFileYaml::Impl>();
+    //impl_->config_file_ = config_file;
+    //impl_->_extract_yaml_data();
+}
+
+/**
+ * @brief VFIConfigurationFileYaml::load_data loads a configuration file.
+ * @param config_file The name of the file including its path and format.
+ */
+void VFIConfigurationFileYaml::load_data(const std::string& config_file)
+{
     impl_->config_file_ = config_file;
     impl_->_extract_yaml_data();
 }
-
 
 
 
@@ -170,8 +182,10 @@ VFIConfigurationFileYaml::VFIConfigurationFileYaml(const std::string& config_fil
  * @brief VFIConfigurationFileYaml::get_raw_data gets the raw data vector from a YAML file.
  * @return A raw data vector.
  */
-std::vector<VFIConfigurationFile::RawData> VFIConfigurationFileYaml::get_raw_data()
+std::vector<VFIConfigurationFile::Data> VFIConfigurationFileYaml::get_data() const
 {
+    if (impl_->raw_data_.empty())
+        throw std::runtime_error("The vector data is empty!");
     return impl_->raw_data_;
 }
 
@@ -181,19 +195,155 @@ std::vector<VFIConfigurationFile::RawData> VFIConfigurationFileYaml::get_raw_dat
  *              the YAML file.
  * @return The desired data.
  */
-int VFIConfigurationFileYaml::get_vfi_file_version()
+int VFIConfigurationFileYaml::get_vfi_file_version() const
 {
     return impl_->vfi_file_version_;
 }
 
+
 /**
- * @brief VFIConfigurationFileYaml::get_zero_indexed_status gets the zero_indexed data from
- *          the YAML file.
- * @return The desired data.
+ * @brief VFIConfigurationFileYaml::is_zero_indexed.
+ * @return Returns true if the configuration file uses a zero-indexed convention to
+ *         describe the joint and robot indexes. False otherwise.
  */
-bool VFIConfigurationFileYaml::get_zero_indexed_status()
+bool VFIConfigurationFileYaml::is_zero_indexed() const
 {
     return impl_->zero_indexed_;
 }
+
+/**
+ * @brief VFIConfigurationFileYaml::save_data saves a configuration file containing the VFI constraints.
+ * @param data the vector that contains the VFI configurations
+ * @param The desired name of the file including its path and format.
+ */
+void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
+                                         const int &vfi_file_version,
+                                         const bool &zero_indexed,
+                                         const std::string &config_file)
+{
+    try {
+        if (config_file.empty())
+            throw std::runtime_error("config_file path cannot be empty!");
+
+        // Create directory if it doesn't exist
+        std::filesystem::path file_path(config_file);
+        std::filesystem::path directory = file_path.parent_path();
+
+        if (!directory.empty() && !std::filesystem::exists(directory)) {
+            std::cout << "Creating directory: " << directory << std::endl;
+            std::filesystem::create_directories(directory);
+        }
+
+        std::ofstream file(config_file);
+        if (!file.is_open()) {
+            throw std::runtime_error("Cannot open file for writing: " + config_file);
+        }
+
+        // Write header using provided parameters
+        file << "vfi_file_version: " << vfi_file_version << "\n";
+        file << "zero_indexed: " << (zero_indexed ? "true" : "false") << "\n";
+        file << "vfi_array:\n";
+
+        // Write each data entry from the provided vector
+        for (const auto& item : data) {
+            file << "  -\n";
+            std::visit([&file](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<T, VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>) {
+                    file << "    vfi_type: \"" << arg.vfi_type << "\"\n";
+
+                    // cs_entity_environment
+                    file << "    cs_entity_environment: [";
+                    for (size_t i = 0; i < arg.cs_entity_environment.size(); ++i) {
+                        file << "\"" << arg.cs_entity_environment[i] << "\"";
+                        if (i < arg.cs_entity_environment.size() - 1) file << ", ";
+                    }
+                    file << "]\n";
+
+                    // cs_entity_robot
+                    file << "    cs_entity_robot: [";
+                    for (size_t i = 0; i < arg.cs_entity_robot.size(); ++i) {
+                        file << "\"" << arg.cs_entity_robot[i] << "\"";
+                        if (i < arg.cs_entity_robot.size() - 1) file << ", ";
+                    }
+                    file << "]\n";
+
+                    file << "    entity_environment_primitive_type: \""
+                         << arg.entity_environment_primitive_type << "\"\n";
+                    file << "    entity_robot_primitive_type: \""
+                         << arg.entity_robot_primitive_type << "\"\n";
+                    file << "    robot_index: " << arg.robot_index << "\n";
+                    file << "    joint_index: " << arg.joint_index << "\n";
+                    file << "    safe_distance: " << arg.safe_distance << "\n";
+
+                    // vfi_gain with .0 for integers
+                    file << "    vfi_gain: ";
+                    if (arg.vfi_gain == static_cast<int>(arg.vfi_gain)) {
+                        file << arg.vfi_gain << ".0";
+                    } else {
+                        file << arg.vfi_gain;
+                    }
+                    file << "\n";
+
+                    file << "    direction: \"" << arg.direction << "\"\n";
+                    file << "    tag: \"" << arg.tag << "\"\n";
+
+                } else if constexpr (std::is_same_v<T, VFIConfigurationFile::ROBOT_TO_ROBOT_DATA>) {
+                    file << "    vfi_type: \"" << arg.vfi_type << "\"\n";
+
+                    // cs_entity_one
+                    file << "    cs_entity_one: [";
+                    for (size_t i = 0; i < arg.cs_entity_one.size(); ++i) {
+                        file << "\"" << arg.cs_entity_one[i] << "\"";
+                        if (i < arg.cs_entity_one.size() - 1) file << ", ";
+                    }
+                    file << "]\n";
+
+                    // cs_entity_two
+                    file << "    cs_entity_two: [";
+                    for (size_t i = 0; i < arg.cs_entity_two.size(); ++i) {
+                        file << "\"" << arg.cs_entity_two[i] << "\"";
+                        if (i < arg.cs_entity_two.size() - 1) file << ", ";
+                    }
+                    file << "]\n";
+
+                    file << "    entity_one_primitive_type: \""
+                         << arg.entity_one_primitive_type << "\"\n";
+                    file << "    entity_two_primitive_type: \""
+                         << arg.entity_two_primitive_type << "\"\n";
+                    file << "    robot_index_one: " << arg.robot_index_one << "\n";
+                    file << "    robot_index_two: " << arg.robot_index_two << "\n";
+                    file << "    joint_index_one: " << arg.joint_index_one << "\n";
+                    file << "    joint_index_two: " << arg.joint_index_two << "\n";
+                    file << "    safe_distance: " << arg.safe_distance << "\n";
+
+                    // vfi_gain with .0 for integers
+                    file << "    vfi_gain: ";
+                    if (arg.vfi_gain == static_cast<int>(arg.vfi_gain)) {
+                        file << arg.vfi_gain << ".0";
+                    } else {
+                        file << arg.vfi_gain;
+                    }
+                    file << "\n";
+
+                    file << "    direction: \"" << arg.direction << "\"\n";
+                    file << "    tag: \"" << arg.tag << "\"\n";
+                }
+            }, item);
+        }
+
+        file.close();
+
+        std::cout << "Successfully saved " << data.size()
+                  << " VFI entries to: " << config_file << std::endl;
+
+    } catch (const std::filesystem::filesystem_error& e) {
+        throw std::runtime_error("Filesystem error in save_data: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error in save_data: " + std::string(e.what()));
+    }
+}
+
 
 }

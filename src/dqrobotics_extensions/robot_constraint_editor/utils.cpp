@@ -30,13 +30,13 @@ std::string join_vector(const std::vector<std::string>& vec, const std::string& 
 
 /**
  * @brief log_complete_raw_data displays on the terminal the raw data vector.
- * @param raw_data The raw data vector obtained from the YAML file.
+ * @param data The raw data vector obtained from the YAML file.
  * @param vfi_file_version
  * @param zero_indexed
  */
-void VFIConfigurationFileRawData::show_data(const std::vector<DQ_robotics_extensions::VFIConfigurationFile::RawData>& raw_data,
-                           const int& vfi_file_version,
-                           const bool& zero_indexed)
+void VFIConfigurationFileData::show_data(const std::vector<VFIConfigurationFile::Data> &data,
+                                            const int& vfi_file_version,
+                                            const bool& zero_indexed)
 {
     std::cout << "╔══════════════════════════════════════════════════════╗" << std::endl;
     std::cout << "║       VFI Configuration File Parser - C++17         ║" << std::endl;
@@ -44,17 +44,17 @@ void VFIConfigurationFileRawData::show_data(const std::vector<DQ_robotics_extens
     std::cout << "\n==========================================" << std::endl;
     std::cout << "VFI_FILE_VERSION: " << vfi_file_version << std::endl;
     std::cout << "Zero Indexed: " + bool2string(zero_indexed) << std::endl;
-    std::cout << "RAW DATA LOG (" << raw_data.size() << " items)" << std::endl;
+    std::cout << "RAW DATA LOG (" << data.size() << " items)" << std::endl;
     std::cout << "==========================================" << std::endl;
 
-    for (size_t i = 0; i < raw_data.size(); ++i) {
-        std::cout << "\n\n[" << i + 1 << "/" << raw_data.size() << "] ";
+    for (size_t i = 0; i < data.size(); ++i) {
+        std::cout << "\n\n[" << i + 1 << "/" << data.size() << "] ";
 
-        if (std::holds_alternative<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_RAW_DATA>(raw_data[i])) {
+        if (std::holds_alternative<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>(data[i])) {
             std::cout << "ENVIRONMENT_TO_ROBOT" << std::endl;
             std::cout << std::string(50, '-') << std::endl;
 
-            auto& env_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_RAW_DATA>(raw_data[i]);
+            auto& env_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>(data[i]);
 
             std::cout << std::left << std::setw(35) << "  vfi_type:" << env_data.vfi_type << std::endl;
             std::cout << std::setw(35) << "  cs_entity_environment:"
@@ -76,7 +76,7 @@ void VFIConfigurationFileRawData::show_data(const std::vector<DQ_robotics_extens
             std::cout << "ROBOT_TO_ROBOT" << std::endl;
             std::cout << std::string(50, '-') << std::endl;
 
-            auto& robot_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_RAW_DATA>(raw_data[i]);
+            auto& robot_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_DATA>(data[i]);
 
             std::cout << std::left << std::setw(35) << "  vfi_type:" << robot_data.vfi_type << std::endl;
             std::cout << std::setw(35) << "  cs_entity_one:"

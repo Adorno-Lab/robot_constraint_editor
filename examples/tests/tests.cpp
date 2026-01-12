@@ -8,17 +8,21 @@ using namespace DQ_robotics_extensions;
 
 int main()
 {
-    auto ri = VFIConfigurationFileYaml("config_file.yaml");
-    VFIConfigurationFileRawData::show_data(ri.get_raw_data(), ri.get_vfi_file_version(), ri.get_zero_indexed_status());
-
+    // This is to test the VFIConfigurationFileYaml //
+    auto ri = std::make_shared<VFIConfigurationFileYaml>();
+    ri->load_data("config_file.yaml");
+    VFIConfigurationFileData::show_data(ri->get_data(), ri->get_vfi_file_version(), ri->is_zero_indexed());
+    //auto yaml_data = ri.get_raw_data();
     //-- Edit the YAML file-----
 
-    auto rce = RobotConstraintEditor();
-    rce.add_data(ri.get_raw_data());
+
+    //----To test the RobotConstraintEditor---//
+    auto rce = RobotConstraintEditor(ri);
+    rce.load_data("config_file.yaml");
 
 
     // Add a new constraint---------
-    DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_RAW_DATA data;
+    DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_DATA data;
     data.vfi_type = "ROBOT_TO_ROBOT";
     data.cs_entity_one = {"entity1", "entity2"};
     data.cs_entity_two = {"entity3", "entity4"};
@@ -35,22 +39,15 @@ int main()
     rce.add_data(data);
 
     //----Edit a constraint
-    std::vector<std::string> new_cs_entity_one = {"new_entity1", "new_entity2"};
-    std::vector<std::string> new_cs_entity_two = {"new_entity3", "new_entity4"};
-    rce.edit_data("TAG_X1", "cs_entity_one", new_cs_entity_one);
-    rce.edit_data("TAG_X1", "cs_entity_two", new_cs_entity_two);
-    rce.edit_data("TAG_X1", "entity_one_primitive_type", std::string("POINT"));
-    rce.edit_data("TAG_X1", "entity_two_primitive_type", std::string("POINT"));
-    rce.edit_data("TAG_X1", "robot_index_one", 11);
-    rce.edit_data("TAG_X1", "robot_index_two", 33);
-    rce.edit_data("TAG_X1", "joint_index_one", 55);
-    rce.edit_data("TAG_X1", "joint_index_two", 66);
-    rce.edit_data("TAG_X1", "safe_distance", 3.2);
-    rce.edit_data("TAG_X1", "vfi_gain", 1.5);
-    rce.edit_data("TAG_X1", "direction", std::string("SAFE_ZONE"));
-    rce.edit_data("TAG_X1", "tag", std::string("TAG_X2"));
+    rce.edit_data("C3", "tag", std::string("C33"));
+
 
     rce.save_data("config_file2.yaml", 2, false);
+
+
+
+    //------------------------------
+
 
     return 0;
 }

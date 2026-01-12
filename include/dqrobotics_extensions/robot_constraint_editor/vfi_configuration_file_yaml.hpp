@@ -35,12 +35,17 @@ private:
     std::shared_ptr<Impl> impl_;
 public:
     ~VFIConfigurationFileYaml() = default;
-    explicit VFIConfigurationFileYaml(const std::string& config_file);
+    explicit VFIConfigurationFileYaml();
 
     // Override from VFIConfigurationFile
-    std::vector<RawData> get_raw_data() override;
-    int get_vfi_file_version() override;
-    bool get_zero_indexed_status() override;
+    void load_data(const std::string& config_file) override;
+    std::vector<VFIConfigurationFile::Data> get_data() const override;
+    int get_vfi_file_version() const override;
+    bool is_zero_indexed() const override;
+    void save_data(const std::vector<Data>& data,
+                   const int& vfi_file_version,
+                   const bool& zero_indexed,
+                   const std::string& config_file) override;
 
 };
 }
