@@ -1,0 +1,44 @@
+vfi_file_version: 2
+zero_indexed: false
+vfi_array:
+    -
+        vfi_type: "ENVIRONMENT_TO_ROBOT"
+        cs_entity_environment: ["Cylinder_1"]
+        cs_entity_robot: ["Sphere_1"]
+        entity_environment_primitive_type: "LINE"
+        entity_robot_primitive_type: "POINT"
+        robot_index: 1
+        joint_index: 1
+        safe_distance: 0.180625
+        vfi_gain: 1.0
+        direction: "RESTRICTED_ZONE"
+        tag: "C1"
+    -       
+        vfi_type: "ROBOT_TO_ROBOT"
+        cs_entity_one: ["Cobotta1_vfi_sphere_0_1"]
+        cs_entity_two: ["Denso1_VS050_vfi_sphere_0_1"]
+        entity_one_primitive_type: "POINT"
+        entity_two_primitive_type: "POINT"
+        robot_index_one: 1
+        robot_index_two: 2
+        joint_index_one: 1
+        joint_index_two: 1
+        safe_distance: 0.16
+        vfi_gain: 1.0
+        direction: "RESTRICTED_ZONE" 
+        tag: "C2"
+    -
+        vfi_type: "ROBOT_TO_ROBOT"
+        cs_entity_one: ["line_1","sphere_1_0","sphere_1_1"]
+        cs_entity_two: ["line_2","sphere_2_1","sphere_2_2"]
+        entity_one_primitive_type: "LINESEGMENT"
+        entity_two_primitive_type: "LINESEGMENT"
+        robot_index_one: 1
+        robot_index_two: 2
+        joint_index_one: 7
+        joint_index_two: 7
+        safe_distance: 0.01
+        vfi_gain: 1.0
+        direction: "RESTRICTED_ZONE"    
+        tag: "C3"  
+

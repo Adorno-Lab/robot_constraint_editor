@@ -1,0 +1,53 @@
+
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
+#include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
+#include <dqrobotics_extensions/robot_constraint_editor/utils.hpp>
+using namespace DQ_robotics_extensions;
+
+
+
+int main()
+{
+    // This is to test the VFIConfigurationFileYaml //
+    auto ri = std::make_shared<VFIConfigurationFileYaml>();
+    ri->load_data("config_file.yaml");
+    VFIConfigurationFileData::show_data(ri->get_data(), ri->get_vfi_file_version(), ri->is_zero_indexed());
+    //auto yaml_data = ri.get_raw_data();
+    //-- Edit the YAML file-----
+
+
+    //----To test the RobotConstraintEditor---//
+    auto rce = RobotConstraintEditor(ri);
+    rce.load_data("config_file.yaml");
+
+
+    // Add a new constraint---------
+    DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_DATA data;
+    data.vfi_type = "ROBOT_TO_ROBOT";
+    data.cs_entity_one = {"entity1", "entity2"};
+    data.cs_entity_two = {"entity3", "entity4"};
+    data.entity_one_primitive_type = "LINE";
+    data.entity_two_primitive_type = "PLANE";
+    data.robot_index_one = 1;
+    data.robot_index_two = 3;
+    data.joint_index_one = 5;
+    data.joint_index_two = 6;
+    data.safe_distance = 2.3;
+    data.vfi_gain = 5.1;
+    data.direction = "RESTRICTED_ZONE";
+    data.tag = "TAG_X1";
+    rce.add_data(data);
+
+    //----Edit a constraint
+    rce.edit_data("C3", "tag", std::string("C33"));
+
+
+    rce.save_data("config_file2.yaml", 2, false);
+
+
+
+    //------------------------------
+
+
+    return 0;
+}

@@ -1,0 +1,46 @@
+name: CPP Build
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testbranches: ['release','master']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Apt update
+        run: sudo apt update
+
+      - name: Install dependencies
+        run: | 
+          sudo apt-get update && sudo apt-get install -y cmake g++ libeigen3-dev fakeroot 
+           
+      - name: Install Yaml-Cpp
+        run: | 
+          git clone https://github.com/jbeder/yaml-cpp
+          cd yaml-cpp
+          mkdir build
+          cd build
+          cmake -DYAML_BUILD_SHARED_LIBS=on ..
+          make
+          sudo make install
+      
+      - name: Build this project
+        run: | 
+          git clone https://github.com/dqrobotics/cpp
+          sh ./cpp/.github/scripts/macos/build.sh    
+
+      - name: Install this project 
+        run: sh ./cpp/.github/scripts/macos/install.sh    
+          
+      - name: Build tests
+        run: |
+             cd examples/tests
+             mkdir -p build && cd build
+             cmake ..
+             make
