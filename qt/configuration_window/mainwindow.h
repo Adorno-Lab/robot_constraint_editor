@@ -41,9 +41,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-    void on_helloWorld_pushButton_pressed();
-
 private:
     Ui::MainWindow *ui;
     void timerEvent(QTimerEvent *event);

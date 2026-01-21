@@ -38,9 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     timerId_ = startTimer(1000); // Start timer for 1000ms
-    ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(100);
-    ui->progressBar->setValue(0);
+
 }
 
 
@@ -54,15 +52,6 @@ MainWindow::~MainWindow()
 }
 
 
-/**
- * @brief MainWindow::on_helloWorld_pushButton_pressed slot method for the "helloWorld_pushButton" object. When the push button is
- *        pressed the "exampleCheckBox" state changes to Qt::Checked.
- */
-void MainWindow::on_helloWorld_pushButton_pressed()
-{
-    ui->exampleCheckBox->setCheckState(Qt::Checked);
-    qDebug()<<"Button pressed!";
-}
 
 /**
  * @brief MainWindow::timerEvent This method is called periodically at the interval defined in the class constructor.
@@ -74,7 +63,5 @@ void MainWindow::timerEvent(QTimerEvent *event)
     counter_++;
     if (counter_>100)
         counter_=0;
-
-    ui->progressBar->setValue(counter_);
 }
 
