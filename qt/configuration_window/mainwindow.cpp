@@ -75,6 +75,6 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
 void MainWindow::on_open_file_action_triggered()
 {
-     auto *open_file_dialogue = new OpenConstraintFileDialog();
+    auto *open_file_dialogue = new OpenConstraintFileDialog(this);
     open_file_dialogue->show();
 }

@@ -6,20 +6,32 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>846</width>
+    <height>603</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>120</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>Open File</string>
+   <string>Open Constraint File</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+   </property>
    <property name="leftMargin">
     <number>9</number>
    </property>
@@ -29,12 +41,15 @@
    <item>
     <widget class="QWidget" name="file_select_widget" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+      </property>
       <property name="topMargin">
        <number>0</number>
       </property>
@@ -42,19 +57,74 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="open_file_explore_pushButton">
-        <property name="text">
-         <string>Select in file explorer</string>
-        </property>
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="open_file_explore_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Select in file explorer</string>
+           </property>
+           <property name="icon">
+            <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>16</width>
+             <height>16</height>
+            </size>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="file_path_lineEdit">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="placeholderText">
+            <string>file/path/goes/here.yaml</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="file_path_lineEdit">
+       <widget class="QLabel" name="error_label">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(165, 29, 45);</string>
+        </property>
         <property name="text">
          <string/>
         </property>
-        <property name="placeholderText">
-         <string>file/path/goes/here.yaml</string>
+        <property name="textFormat">
+         <enum>Qt::TextFormat::PlainText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="margin">
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -70,7 +140,13 @@
       </sizepolicy>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
       <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
        <number>0</number>
       </property>
       <property name="bottomMargin">
