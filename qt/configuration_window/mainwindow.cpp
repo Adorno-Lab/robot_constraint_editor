@@ -41,6 +41,22 @@ MainWindow::MainWindow(QWidget *parent)
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(100);
     ui->progressBar->setValue(0);
+
+    _connect_signal_to_slots();
+}
+
+/**
+ * @brief MainWindow::_connect_signal_to_slots connects the signals to their
+ *                  corresponding slots. This method must be called in the ctor
+ *                  of the class.
+ *                  https://doc.qt.io/qt-6/signalsandslots.html
+ */
+void MainWindow::_connect_signal_to_slots()
+{
+    connect(ui->helloWorld_pushButton, &QPushButton::clicked, this,
+            &::MainWindow::_helloWorld_pushButton_pressed);
+
+    //-- Add more connections here---//
 }
 
 
@@ -58,7 +74,7 @@ MainWindow::~MainWindow()
  * @brief MainWindow::on_helloWorld_pushButton_pressed slot method for the "helloWorld_pushButton" object. When the push button is
  *        pressed the "exampleCheckBox" state changes to Qt::Checked.
  */
-void MainWindow::on_helloWorld_pushButton_pressed()
+void MainWindow::_helloWorld_pushButton_pressed()
 {
     ui->exampleCheckBox->setCheckState(Qt::Checked);
     qDebug()<<"Button pressed!";
@@ -77,4 +93,5 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
     ui->progressBar->setValue(counter_);
 }
+
 

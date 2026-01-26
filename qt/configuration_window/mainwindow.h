@@ -42,12 +42,13 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_helloWorld_pushButton_pressed();
+    void _helloWorld_pushButton_pressed();
 
 private:
     Ui::MainWindow *ui;
     void timerEvent(QTimerEvent *event);
     int timerId_;
     int counter_;
+    void _connect_signal_to_slots();
 };
 
