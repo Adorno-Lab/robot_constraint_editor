@@ -43,9 +43,7 @@ public:
 
 
 private slots:
-
-private slots:
-
+    void on_open_file_action_triggered();
 
 private:
     Ui::MainWindow *ui;

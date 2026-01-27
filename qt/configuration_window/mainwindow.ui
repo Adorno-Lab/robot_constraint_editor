@@ -16,10 +16,26 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="constraint_file_label">
-      <property name="text">
-       <string>File: No file Selected</string>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="constraint_file_label">
+         <property name="text">
+          <string>File: No constraint file currently open</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="constraint_parameters_label">
+         <property name="text">
+          <string>Constraint parameters:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -66,7 +82,7 @@
                <x>0</x>
                <y>0</y>
                <width>479</width>
-               <height>598</height>
+               <height>570</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -140,7 +156,7 @@
                <x>0</x>
                <y>0</y>
                <width>478</width>
-               <height>598</height>
+               <height>570</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -193,28 +209,53 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>985</width>
-     <height>23</height>
-    </rect>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
    </property>
-   <widget class="QMenu" name="menuOpen_file">
-    <property name="title">
-     <string>Open file</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuSave_file">
-    <property name="title">
-     <string>Save file</string>
-    </property>
-   </widget>
-   <addaction name="menuOpen_file"/>
-   <addaction name="menuSave_file"/>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="open_file_action"/>
+   <addaction name="save_file_action"/>
   </widget>
+  <action name="open_file_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
+   </property>
+   <property name="text">
+    <string>Open constraint file</string>
+   </property>
+   <property name="iconText">
+    <string>Open constraint file</string>
+   </property>
+   <property name="toolTip">
+    <string>Open diaglogue which can open constraint files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="save_file_action">
+   <property name="icon">
+    <iconset theme="media-floppy"/>
+   </property>
+   <property name="text">
+    <string>save_file</string>
+   </property>
+   <property name="toolTip">
+    <string>Saves changes to selected constraint file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::TextHeuristicRole</enum>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
