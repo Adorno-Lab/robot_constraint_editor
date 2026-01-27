@@ -26,6 +26,7 @@
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "openconstraintfiledialog.h"
 
 /**
  * @brief MainWindow::MainWindow ctor of the class
@@ -38,27 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     timerId_ = startTimer(1000); // Start timer for 1000ms
-    ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(100);
-    ui->progressBar->setValue(0);
-
-    _connect_signal_to_slots();
 }
-
-/**
- * @brief MainWindow::_connect_signal_to_slots connects the signals to their
- *                  corresponding slots. This method must be called in the ctor
- *                  of the class.
- *                  https://doc.qt.io/qt-6/signalsandslots.html
- */
-void MainWindow::_connect_signal_to_slots()
-{
-    connect(ui->helloWorld_pushButton, &QPushButton::clicked, this,
-            &::MainWindow::_helloWorld_pushButton_pressed);
-
-    //-- Add more connections here---//
-}
-
 
 /**
  * @brief MainWindow::~MainWindow destructor of the class
@@ -67,17 +48,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
     killTimer(timerId_);
-}
-
-
-/**
- * @brief MainWindow::on_helloWorld_pushButton_pressed slot method for the "helloWorld_pushButton" object. When the push button is
- *        pressed the "exampleCheckBox" state changes to Qt::Checked.
- */
-void MainWindow::_helloWorld_pushButton_pressed()
-{
-    ui->exampleCheckBox->setCheckState(Qt::Checked);
-    qDebug()<<"Button pressed!";
 }
 
 /**
@@ -90,8 +60,30 @@ void MainWindow::timerEvent(QTimerEvent *event)
     counter_++;
     if (counter_>100)
         counter_=0;
+}
 
-    ui->progressBar->setValue(counter_);
+void MainWindow::on_FileOpenValueReturnFromDialog(QString file_path)
+{
+    if (file_path.length()>60){
+        MainWindow::ui->constraint_file_label->setText("File: ..."+file_path.last(60)); // prevents file path wrap arround at default size
+    }
+    else{
+        MainWindow::ui->constraint_file_label->setText("File: "+file_path);
+    }
+
+}
+
+void MainWindow::on_open_file_action_triggered()
+{
+
+    this->setEnabled(0);
+    auto *open_file_dialogue = new OpenConstraintFileDialog(this);
+    QObject::connect(open_file_dialogue,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::on_FileOpenValueReturnFromDialog);
+    open_file_dialogue->show();
+    if (!open_file_dialogue->exec())
+    {
+        this->setEnabled(1);
+    }
 }
 
 
