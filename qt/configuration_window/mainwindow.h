@@ -26,8 +26,12 @@
 
 #pragma once
 #include <QMainWindow>
+#include <QFile>
+#include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
 
 QT_BEGIN_NAMESPACE
+using namespace DQ_robotics_extensions;
 namespace Ui {
 class MainWindow;
 }
@@ -41,7 +45,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-
+public slots:
+    void on_FileOpenValueReturnFromDialog(QString file_path); // i'm so sorry this is named like this but qt moc starts to get really annoyed if you don't follow their naming conventions
+    // See: https://stackoverflow.com/questions/24355023/qmetaobjectconnectslotsbyname-no-matching-signal
 private slots:
     void on_open_file_action_triggered();
 

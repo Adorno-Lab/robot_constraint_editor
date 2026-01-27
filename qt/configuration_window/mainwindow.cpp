@@ -72,9 +72,28 @@ void MainWindow::timerEvent(QTimerEvent *event)
         counter_=0;
 }
 
+void MainWindow::on_FileOpenValueReturnFromDialog(QString file_path)
+{
+    if (file_path.length()>60){
+        MainWindow::ui->constraint_file_label->setText("File: ..."+file_path.last(60)); // prevents file path wrap arround at default size
+    }
+    else{
+        MainWindow::ui->constraint_file_label->setText("File: "+file_path);
+    }
+
+}
 
 void MainWindow::on_open_file_action_triggered()
 {
+
+    this->setEnabled(0);
     auto *open_file_dialogue = new OpenConstraintFileDialog(this);
+    QObject::connect(open_file_dialogue,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::on_FileOpenValueReturnFromDialog);
     open_file_dialogue->show();
+    if (!open_file_dialogue->exec())
+    {
+        this->setEnabled(1);
+    }
 }
+
+

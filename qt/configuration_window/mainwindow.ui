@@ -16,32 +16,6 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QWidget" name="widget" native="true">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="constraint_file_label">
-         <property name="text">
-          <string>File: No constraint file currently open</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="constraint_parameters_label">
-         <property name="text">
-          <string>Constraint parameters:</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
      <widget class="QWidget" name="constraint_widget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
@@ -62,11 +36,14 @@
        <item>
         <widget class="QWidget" name="Constraint_select_widget" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
           <property name="topMargin">
-           <number>0</number>
+           <number>10</number>
           </property>
           <property name="rightMargin">
            <number>0</number>
@@ -74,6 +51,16 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
+          <item>
+           <widget class="QLabel" name="constraint_file_label">
+            <property name="text">
+             <string>File: No constraint file currently open</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QScrollArea" name="constraint_select_scrollArea">
             <property name="widgetResizable">
@@ -85,7 +72,7 @@
                <x>0</x>
                <y>0</y>
                <width>479</width>
-               <height>579</height>
+               <height>590</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -136,11 +123,14 @@
           <bool>false</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
           <property name="topMargin">
-           <number>0</number>
+           <number>9</number>
           </property>
           <property name="rightMargin">
            <number>0</number>
@@ -148,6 +138,13 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
+          <item>
+           <widget class="QLabel" name="constraint_parameters_label">
+            <property name="text">
+             <string>Constraint parameters:</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QScrollArea" name="constraint_edit_scrollArea">
             <property name="widgetResizable">
@@ -159,7 +156,7 @@
                <x>0</x>
                <y>0</y>
                <width>478</width>
-               <height>579</height>
+               <height>591</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">

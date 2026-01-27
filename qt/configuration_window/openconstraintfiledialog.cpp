@@ -1,9 +1,14 @@
+
 #include "openconstraintfiledialog.h"
 #include "ui_openconstraintfiledialog.h"
 #include <QFileDialog>
 #include <QDebug>
 #include <QFile>
-
+#include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
+#include <stdlib.h>
+#include <yaml-cpp/yaml.h>
+using namespace DQ_robotics_extensions;
 
 OpenConstraintFileDialog::OpenConstraintFileDialog(QWidget *parent)
     : QDialog(parent)
@@ -14,6 +19,7 @@ OpenConstraintFileDialog::OpenConstraintFileDialog(QWidget *parent)
 
 OpenConstraintFileDialog::~OpenConstraintFileDialog()
 {
+    OpenConstraintFileDialog::enable_main_window();
     delete ui;
 }
 
@@ -48,7 +54,17 @@ void OpenConstraintFileDialog::on_cancle_pushButton_clicked()
 void OpenConstraintFileDialog::on_open_file_pushButton_clicked()
 {
     if(QFile::exists(ui->file_path_lineEdit->text()) == true){
-        qDebug("Yay the file exists");
+        //qDebug("Yay the file exists");
+        auto ri= std::make_shared<VFIConfigurationFileYaml>();
+        try{
+            ri->load_data(ui->file_path_lineEdit->text().toStdString());
+            OpenConstraintFileDialog::return_open_file_to_window(ui->file_path_lineEdit->text());
+            this->reject(); // Not sure if using reject here is bad but eh it works
+        }
+        catch(const std::runtime_error& error){ // Need to talk to juan about error catching here. His code simply prints to terminal without passing an error that can be caught
+            ui->error_label->setText(QString::fromStdString(error.what()));
+        }
+
     }
     else{
         ui->error_label->setText("ERROR: YAML file not found. Check file path.");

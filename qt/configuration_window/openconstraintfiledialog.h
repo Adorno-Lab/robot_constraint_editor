@@ -22,6 +22,9 @@ private slots:
 
     void on_open_file_pushButton_clicked();
 
+signals:
+    void return_open_file_to_window(QString Filepath);
+    void enable_main_window();
 private:
     Ui::OpenConstraintFileDialog *ui;
 };
