@@ -29,6 +29,9 @@
 #include <QFile>
 #include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
 #include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
+#include "open_constraint_file_dialog.h"
+#include <QPointer>
+
 
 QT_BEGIN_NAMESPACE
 using namespace DQ_robotics_extensions;
@@ -46,8 +49,7 @@ public:
     ~MainWindow();
 
 public slots:
-    void on_FileOpenValueReturnFromDialog(QString file_path); // i'm so sorry this is named like this but qt moc starts to get really annoyed if you don't follow their naming conventions
-    // See: https://stackoverflow.com/questions/24355023/qmetaobjectconnectslotsbyname-no-matching-signal
+    void file_open_value_returned_from_dialog(QString file_path);
 private slots:
     void on_open_file_action_triggered();
 
@@ -57,5 +59,8 @@ private:
     int timerId_;
     int counter_;
     void _connect_signal_to_slots();
+
+    QPointer<OpenConstraintFileDialog> open_file_dialogue_; //used Qpointer instead of std::sharedpntr to avoid repeat attempts at deletion
+    // See: https://stackoverflow.com/questions/10963246/using-qt-objects-with-stdshared-ptr
 };
 

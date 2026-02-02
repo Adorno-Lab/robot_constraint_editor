@@ -26,7 +26,8 @@
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "openconstraintfiledialog.h"
+
+
 
 /**
  * @brief MainWindow::MainWindow ctor of the class
@@ -39,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     timerId_ = startTimer(1000); // Start timer for 1000ms
+    this->_connect_signal_to_slots();
 }
 
 /**
@@ -48,6 +50,11 @@ MainWindow::~MainWindow()
 {
     delete ui;
     killTimer(timerId_);
+}
+
+void MainWindow::_connect_signal_to_slots()
+{
+
 }
 
 /**
@@ -62,7 +69,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
         counter_=0;
 }
 
-void MainWindow::on_FileOpenValueReturnFromDialog(QString file_path)
+void MainWindow::file_open_value_returned_from_dialog(QString file_path)
 {
     if (file_path.length()>60){
         MainWindow::ui->constraint_file_label->setText("File: ..."+file_path.last(60)); // prevents file path wrap arround at default size
@@ -75,14 +82,14 @@ void MainWindow::on_FileOpenValueReturnFromDialog(QString file_path)
 
 void MainWindow::on_open_file_action_triggered()
 {
-
-    this->setEnabled(0);
-    auto *open_file_dialogue = new OpenConstraintFileDialog(this);
-    QObject::connect(open_file_dialogue,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::on_FileOpenValueReturnFromDialog);
-    open_file_dialogue->show();
-    if (!open_file_dialogue->exec())
+    setEnabled(0); // disabled to prevent additional dialogs being opened
+    open_file_dialogue_ = new OpenConstraintFileDialog(this);
+    //following connection not opened in constructor as does not need to be open for lifetime of program
+    QObject::connect(open_file_dialogue_,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::file_open_value_returned_from_dialog);
+    open_file_dialogue_->show();
+    if (!open_file_dialogue_->exec())
     {
-        this->setEnabled(1);
+        setEnabled(1);
     }
 }
 

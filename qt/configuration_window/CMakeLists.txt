@@ -21,15 +21,16 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        openconstraintfiledialog.h
-        openconstraintfiledialog.cpp
-        openconstraintfiledialog.ui
+        open_constraint_file_dialog.h
+        open_constraint_file_dialog.cpp
+        open_constraint_file_dialog.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(configuration_window
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET configuration_window APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
