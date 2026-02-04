@@ -41,7 +41,6 @@ void OpenConstraintFileDialog::on_open_file_explore_pushButton_clicked()
     else{
         ui->open_file_explore_pushButton->setEnabled(1);
     }
-
 }
 
 
@@ -64,7 +63,6 @@ void OpenConstraintFileDialog::on_open_file_pushButton_clicked()
         catch(const std::runtime_error& error){ // Need to talk to juan about error catching here. His code simply prints to terminal without passing an error that can be caught
             ui->error_label->setText(QString::fromStdString(error.what()));
         }
-
     }
     else{
         ui->error_label->setText("ERROR: YAML file not found. Check file path.");

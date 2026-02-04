@@ -51,16 +51,13 @@ public:
 public slots:
     void file_open_value_returned_from_dialog(QString file_path);
 private slots:
-    void on_open_file_action_triggered();
+    void open_file_action_triggered();
 
 private:
     Ui::MainWindow *ui;
-    void timerEvent(QTimerEvent *event);
-    int timerId_;
-    int counter_;
     void _connect_signal_to_slots();
 
-    QPointer<OpenConstraintFileDialog> open_file_dialogue_; //used Qpointer instead of std::sharedpntr to avoid repeat attempts at deletion
+    QPointer<OpenConstraintFileDialog> open_file_dialog_; //used Qpointer instead of std::sharedpntr to avoid repeat attempts at deletion
     // See: https://stackoverflow.com/questions/10963246/using-qt-objects-with-stdshared-ptr
 };
 

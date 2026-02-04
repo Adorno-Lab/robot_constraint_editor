@@ -35,12 +35,10 @@
  */
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow{parent}
-    , ui{new Ui::MainWindow},
-    counter_{0}
+    , ui{new Ui::MainWindow}
 {
     ui->setupUi(this);
-    timerId_ = startTimer(1000); // Start timer for 1000ms
-    this->_connect_signal_to_slots();
+    _connect_signal_to_slots();
 }
 
 /**
@@ -49,11 +47,11 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-    killTimer(timerId_);
 }
 
 void MainWindow::_connect_signal_to_slots()
 {
+    QObject::connect(ui->open_file_action, &QAction::triggered, this, &MainWindow::open_file_action_triggered);
 
 }
 
@@ -62,12 +60,6 @@ void MainWindow::_connect_signal_to_slots()
  *              In this example, this method updates the progressBar object.
  * @param event
  */
-void MainWindow::timerEvent(QTimerEvent *event)
-{
-    counter_++;
-    if (counter_>100)
-        counter_=0;
-}
 
 void MainWindow::file_open_value_returned_from_dialog(QString file_path)
 {
@@ -77,17 +69,16 @@ void MainWindow::file_open_value_returned_from_dialog(QString file_path)
     else{
         MainWindow::ui->constraint_file_label->setText("File: "+file_path);
     }
-
 }
 
-void MainWindow::on_open_file_action_triggered()
+void MainWindow::open_file_action_triggered()
 {
     setEnabled(0); // disabled to prevent additional dialogs being opened
-    open_file_dialogue_ = new OpenConstraintFileDialog(this);
+    open_file_dialog_ = new OpenConstraintFileDialog(this);
     //following connection not opened in constructor as does not need to be open for lifetime of program
-    QObject::connect(open_file_dialogue_,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::file_open_value_returned_from_dialog);
-    open_file_dialogue_->show();
-    if (!open_file_dialogue_->exec())
+    QObject::connect(open_file_dialog_,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::file_open_value_returned_from_dialog);
+    open_file_dialog_->show();
+    if (!open_file_dialog_->exec())
     {
         setEnabled(1);
     }
