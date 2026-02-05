@@ -136,6 +136,7 @@ public:
                 }
                 catch (const YAML::Exception& e) {
                     std::cerr << "Error parsing VFI item: " << e.what() << std::endl;
+                    throw std::runtime_error(e.msg);
                 }
             }
         }
