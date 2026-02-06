@@ -22,11 +22,11 @@ public:
     ~OpenConstraintFileDialog();
 
 private slots:
-    void on_open_file_explore_pushButton_clicked();
+    void open_file_explore_pushButton_clicked();
 
-    void on_cancel_pushButton_clicked();
+    void cancel_pushButton_clicked();
 
-    void on_open_file_pushButton_clicked();
+    void open_file_pushButton_clicked();
 
 signals:
     void return_open_file_to_window(QString file_path);

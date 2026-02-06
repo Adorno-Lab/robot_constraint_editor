@@ -49,20 +49,27 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/** @brief MainWindow::_connect_signal_to_slots connects the signals to their
+  *                        corresponding slots. This method must be called in the ctor
+  *                            of the class.
+  *                               https://doc.qt.io/qt-6/signalsandslots.html
+*/
 void MainWindow::_connect_signal_to_slots()
 {
     QObject::connect(ui->open_file_action, &QAction::triggered, this, &MainWindow::open_file_action_triggered);
 
 }
 
-/**
- * @brief MainWindow::timerEvent This method is called periodically at the interval defined in the class constructor.
- *              In this example, this method updates the progressBar object.
- * @param event
- */
 
+/** @brief MainWindow::file_open_value_returned_from_dialog Is a QT slot which accepts the file path to a valid VFI config file.
+ *                                                          It stores this value in the constraint_file_filepath_ member variable.
+ *                                                          This is value is also saved to the text field of text label in the the main window.
+ *                                                          The value is shortened if over a certain length for visual simplicity.
+ *                                                          It is connected not in open_file_action_triggered
+ *\param file_path is the file path to the specified file
+ */
 void MainWindow::file_open_value_returned_from_dialog(QString file_path)
-{
+{   this->constraint_file_filepath_ = file_path;
     if (file_path.length()>60){
         MainWindow::ui->constraint_file_label->setText("File: ..."+file_path.last(60)); // prevents file path wrap arround at default size
     }
@@ -71,14 +78,21 @@ void MainWindow::file_open_value_returned_from_dialog(QString file_path)
     }
 }
 
+
+
+/** @brief MainWindow::open_file_action_triggered is a QT slot which responds to the action of the user opening a new file
+  *                                               (either by pressing the hotbar button or by using the shortcut Ctrl+o .
+  *                                               It disables the main window, connects the signals and slots needed to return a value
+  *                                               and simply waits for the value to be returned.
+   */
 void MainWindow::open_file_action_triggered()
 {
     setEnabled(0); // disabled to prevent additional dialogs being opened
-    open_file_dialog_ = new OpenConstraintFileDialog(this);
+     OpenConstraintFileDialog open_file_dialog;
     //following connection not opened in constructor as does not need to be open for lifetime of program
-    QObject::connect(open_file_dialog_,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::file_open_value_returned_from_dialog);
-    open_file_dialog_->show();
-    if (!open_file_dialog_->exec())
+    QObject::connect(&open_file_dialog,&OpenConstraintFileDialog::return_open_file_to_window,this,&MainWindow::file_open_value_returned_from_dialog);
+    open_file_dialog.show();
+    if (!open_file_dialog.exec())
     {
         setEnabled(1);
     }

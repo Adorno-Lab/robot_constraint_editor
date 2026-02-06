@@ -15,7 +15,7 @@
 #    along with robot_constraint_editor.  If not, see <https://www.gnu.org/licenses/>.
 #
 # ################################################################
-#   Minimal Example
+#   Robot Constraint Editor
 #   Author: Juan Jose Quiroz Omana (email: juanjose.quirozomana@manchester.ac.uk)
 #
 #   Contributors:
@@ -56,8 +56,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     void _connect_signal_to_slots();
-
-    QPointer<OpenConstraintFileDialog> open_file_dialog_; //used Qpointer instead of std::sharedpntr to avoid repeat attempts at deletion
-    // See: https://stackoverflow.com/questions/10963246/using-qt-objects-with-stdshared-ptr
+    QString constraint_file_filepath_;
 };
 
