@@ -15,7 +15,7 @@
 #    along with robot_constraint_editor.  If not, see <https://www.gnu.org/licenses/>.
 #
 # ################################################################
-#   Minimal Example
+#   Robot Constraint Editor
 #   Author: Juan Jose Quiroz Omana (email: juanjose.quirozomana@manchester.ac.uk)
 #
 #   Contributors:
@@ -26,8 +26,15 @@
 
 #pragma once
 #include <QMainWindow>
+#include <QFile>
+#include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
+#include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
+#include "open_constraint_file_dialog.h"
+#include <QPointer>
+
 
 QT_BEGIN_NAMESPACE
+using namespace DQ_robotics_extensions;
 namespace Ui {
 class MainWindow;
 }
@@ -41,14 +48,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void file_open_value_returned_from_dialog(QString file_path);
 private slots:
-    void _helloWorld_pushButton_pressed();
+    void open_file_action_triggered();
 
 private:
     Ui::MainWindow *ui;
-    void timerEvent(QTimerEvent *event);
-    int timerId_;
-    int counter_;
     void _connect_signal_to_slots();
+    QString constraint_file_filepath_;
+    std::shared_ptr<DQ_robotics_extensions::VFIConfigurationFileYaml> vfi_yaml_;
+    DQ_robotics_extensions::RobotConstraintEditor robot_constraint_editor_;
 };
 
