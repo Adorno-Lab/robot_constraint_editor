@@ -57,5 +57,7 @@ private:
     Ui::MainWindow *ui;
     void _connect_signal_to_slots();
     QString constraint_file_filepath_;
+    std::shared_ptr<DQ_robotics_extensions::VFIConfigurationFileYaml> vfi_yaml_;
+    DQ_robotics_extensions::RobotConstraintEditor robot_constraint_editor_;
 };
 

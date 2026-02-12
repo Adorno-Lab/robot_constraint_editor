@@ -27,15 +27,15 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-
-
 /**
- * @brief MainWindow::MainWindow ctor of the class
+ * @brief MainWindow::MainWindow  ctor of the class
  * @param parent
  */
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow{parent}
     , ui{new Ui::MainWindow}
+    , robot_constraint_editor_(vfi_yaml_)
 {
     ui->setupUi(this);
     _connect_signal_to_slots();
@@ -49,10 +49,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/** @brief MainWindow::_connect_signal_to_slots connects the signals to their
+/**
+ * @brief MainWindow::_connect_signal_to_slots connects the signals to their
   *                                             corresponding slots. This method must be called in the ctor
   *                                             of the class.https://doc.qt.io/qt-6/signalsandslots.html
-*/
+ */
 void MainWindow::_connect_signal_to_slots()
 {
     QObject::connect(ui->open_file_action, &QAction::triggered, this, &MainWindow::open_file_action_triggered);
@@ -60,12 +61,13 @@ void MainWindow::_connect_signal_to_slots()
 }
 
 
-/** @brief MainWindow::file_open_value_returned_from_dialog Is a QT slot which accepts the file path to a valid VFI config file.
+/**
+ * @brief MainWindow::file_open_value_returned_from_dialog Is a QT slot which accepts the file path to a valid VFI config file.
  *                                                          It stores this value in the constraint_file_filepath_ member variable.
  *                                                          This is value is also saved to the text field of text label in the the main window.
  *                                                          The value is shortened if over a certain length for visual simplicity.
  *                                                          It is connected not in open_file_action_triggered
- *\param file_path is the file path to the specified file
+ * @param file_path
  */
 void MainWindow::file_open_value_returned_from_dialog(QString file_path)
 {   this->constraint_file_filepath_ = file_path;
@@ -75,15 +77,17 @@ void MainWindow::file_open_value_returned_from_dialog(QString file_path)
     else{
         MainWindow::ui->constraint_file_label->setText("File: "+file_path);
     }
+    ui->constraint_select_tableWidget->clear();
+    QStringList headers = {"Tag","Constraint Type", "VFI Gain"};
+    ui->constraint_select_tableWidget->setHorizontalHeaderLabels(headers);
 }
 
-
-
-/** @brief MainWindow::open_file_action_triggered is a QT slot which responds to the action of the user opening a new file
+/**
+ * @brief MainWindow::open_file_action_triggered is a QT slot which responds to the action of the user opening a new file
   *                                               (either by pressing the hotbar button or by using the shortcut Ctrl+o .
   *                                               It disables the main window, connects the signals and slots needed to return a value
   *                                               and simply waits for the value to be returned.
-   */
+ */
 void MainWindow::open_file_action_triggered()
 {
     setEnabled(0); // disabled to prevent additional dialogs being opened

@@ -4,9 +4,10 @@
 
 using namespace DQ_robotics_extensions;
 
-/** @brief OpenConstraintFileDialog::OpenConstraintFileDialog constructor of the class
-\param parent should always be main window.
-*/
+/**
+ * @brief OpenConstraintFileDialog::OpenConstraintFileDialog constructor of the class
+ * @param parent should always be the main window
+ */
 OpenConstraintFileDialog::OpenConstraintFileDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::OpenConstraintFileDialog)
@@ -15,19 +16,19 @@ OpenConstraintFileDialog::OpenConstraintFileDialog(QWidget *parent)
     _connect_signal_to_slots();
 }
 
-/** @brief OpenConstraintFileDialog::~OpenConstraintFileDialog destructor of class
-
-*/
+/**
+ * @brief OpenConstraintFileDialog::~OpenConstraintFileDialog destructor of class
+ */
 OpenConstraintFileDialog::~OpenConstraintFileDialog()
 {
     delete ui;
 }
 
-
-/** @brief  OpenConstraintFileDialog::_connect_signal_to_slots connects the signals to their
+/**
+ * @brief OpenConstraintFileDialog::_connect_signal_to_slots connects the signals to their
   *                                                            corresponding slots. This method must be called in the ctor
   *                                                            of the class.https://doc.qt.io/qt-6/signalsandslots.html
-*/
+ */
 void OpenConstraintFileDialog::_connect_signal_to_slots(){
     QObject::connect(ui->cancel_pushButton,&QPushButton::clicked,this,&OpenConstraintFileDialog::cancel_pushButton_clicked);
     QObject::connect(ui->open_file_explore_pushButton,&QPushButton::clicked,this,&OpenConstraintFileDialog::open_file_explore_pushButton_clicked);
@@ -35,12 +36,13 @@ void OpenConstraintFileDialog::_connect_signal_to_slots(){
 }
 
 
-/** @brief OpenConstraintFileDialog::open_file_explore_pushButton_clicked QT slot connecting to file_explore_pushButton being clicked.
+/**
+ * @brief OpenConstraintFileDialog::open_file_explore_pushButton_clicked QT slot connecting to file_explore_pushButton being clicked.
  *                                                                        Disables button. Opens QFileDialog instance. Sets file mode so user can only
  *                                                                        select a single file. Restricts file display to YAML files. Stores result in file
  *                                                                        path line edit so user can edit filepath if needed. Closes file explore. Renables
  *                                                                        Button.
-*/
+ */
 void OpenConstraintFileDialog::open_file_explore_pushButton_clicked()
 {
     ui->open_file_explore_pushButton->setEnabled(0);
@@ -61,22 +63,22 @@ void OpenConstraintFileDialog::open_file_explore_pushButton_clicked()
     }
 }
 
-/** @brief OpenConstraintFileDialog::cancel_pushButton_clicked QT slot which connects cancel button to closure of OpenConstraintFileDialog instance.
-
-*/
+/**
+ * @brief OpenConstraintFileDialog::cancel_pushButton_clicked QT slot which connects cancel button to closure of OpenConstraintFileDialog instance.
+ */
 void OpenConstraintFileDialog::cancel_pushButton_clicked()
 {
     this->reject();
 }
 
 
-/** @brief OpenConstraintFileDialog::open_file_pushButton_clicked QT slot which connects open file button to return of the file path to the main window.
+/**
+ * @brief OpenConstraintFileDialog::open_file_pushButton_clicked QT slot which connects open file button to return of the file path to the main window.
  *                                                                First checks if file exists. Then tries to open the file as VFIConfigurationFileYaml. If
  *                                                                it fails we can assume the file is not in the correct format and can deliver the required
  *                                                                error messages to the user via label. If it works we can assume the file is correct and
  *                                                                return it to the main window for further use.
-
-*/
+ */
 void OpenConstraintFileDialog::open_file_pushButton_clicked()
 {
     if(QFile::exists(ui->file_path_lineEdit->text()) == true){
