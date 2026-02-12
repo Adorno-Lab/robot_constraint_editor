@@ -26,8 +26,7 @@ OpenConstraintFileDialog::~OpenConstraintFileDialog()
 
 /**
  * @brief OpenConstraintFileDialog::_connect_signal_to_slots connects the signals to their
-  *                                                            corresponding slots. This method must be called in the ctor
-  *                                                            of the class.https://doc.qt.io/qt-6/signalsandslots.html
+ *                                                            corresponding slots. This method must be called in the ctor                                                              of the class.https://doc.qt.io/qt-6/signalsandslots.html
  */
 void OpenConstraintFileDialog::_connect_signal_to_slots(){
     QObject::connect(ui->cancel_pushButton,&QPushButton::clicked,this,&OpenConstraintFileDialog::cancel_pushButton_clicked);

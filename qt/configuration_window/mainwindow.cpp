@@ -51,8 +51,8 @@ MainWindow::~MainWindow()
 
 /**
  * @brief MainWindow::_connect_signal_to_slots connects the signals to their
-  *                                             corresponding slots. This method must be called in the ctor
-  *                                             of the class.https://doc.qt.io/qt-6/signalsandslots.html
+ *                                             corresponding slots. This method must be called in the ctor
+ *                                             of the class.https://doc.qt.io/qt-6/signalsandslots.html
  */
 void MainWindow::_connect_signal_to_slots()
 {
@@ -84,9 +84,8 @@ void MainWindow::file_open_value_returned_from_dialog(QString file_path)
 
 /**
  * @brief MainWindow::open_file_action_triggered is a QT slot which responds to the action of the user opening a new file
-  *                                               (either by pressing the hotbar button or by using the shortcut Ctrl+o .
-  *                                               It disables the main window, connects the signals and slots needed to return a value
-  *                                               and simply waits for the value to be returned.
+ *                                               (either by pressing the hotbar button or by using the shortcut Ctrl+o .
+ *                                               It disables the main window, connects the signals and slots needed to return a value                                                 and simply waits for the value to be returned.
  */
 void MainWindow::open_file_action_triggered()
 {
