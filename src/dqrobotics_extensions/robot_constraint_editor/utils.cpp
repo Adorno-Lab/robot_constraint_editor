@@ -68,6 +68,7 @@ void VFIConfigurationFileData::show_data(const std::vector<VFIConfigurationFile:
             std::cout << std::setw(35) << "  robot_index:" << env_data.robot_index << std::endl;
             std::cout << std::setw(35) << "  joint_index:" << env_data.joint_index << std::endl;
             std::cout << std::setw(35) << "  safe_distance:" << env_data.safe_distance << std::endl;
+            std::cout << std::setw(35) << "  buffer:" << env_data.buffer << std::endl;
             std::cout << std::setw(35) << "  vfi_gain:" << env_data.vfi_gain << std::endl;
             std::cout << std::setw(35) << "  direction:" << env_data.direction << std::endl;
             std::cout << std::setw(35) << "  tag:" << env_data.tag << std::endl;
@@ -92,6 +93,7 @@ void VFIConfigurationFileData::show_data(const std::vector<VFIConfigurationFile:
             std::cout << std::setw(35) << "  joint_index_one:" << robot_data.joint_index_one << std::endl;
             std::cout << std::setw(35) << "  joint_index_two:" << robot_data.joint_index_two << std::endl;
             std::cout << std::setw(35) << "  safe_distance:" << robot_data.safe_distance << std::endl;
+            std::cout << std::setw(35) << "  buffer:" << robot_data.buffer << std::endl;
             std::cout << std::setw(35) << "  vfi_gain:" << robot_data.vfi_gain << std::endl;
             std::cout << std::setw(35) << "  direction:" << robot_data.direction << std::endl;
             std::cout << std::setw(35) << "  tag:" << robot_data.tag << std::endl;

@@ -106,6 +106,14 @@ public:
                         env_data.robot_index = parameter["robot_index"].as<int>();
                         env_data.joint_index = parameter["joint_index"].as<int>();
                         env_data.safe_distance = parameter["safe_distance"].as<double>();
+                        try {
+                            env_data.buffer = parameter["buffer"].as<double>();
+                        } catch (...) {
+                            // Use the default buffer value defined in the virtual class
+                            DQ_robotics_extensions::VFIConfigurationFile::BASE_DATA data;
+                            env_data.buffer = data.buffer;
+                        }
+
                         env_data.vfi_gain = parameter["vfi_gain"].as<double>();
                         env_data.direction = parameter["direction"].as<std::string>();
                         env_data.tag = parameter["tag"].as<std::string>();
@@ -125,6 +133,13 @@ public:
                         robot_data.joint_index_one = parameter["joint_index_one"].as<int>();
                         robot_data.joint_index_two = parameter["joint_index_two"].as<int>();
                         robot_data.safe_distance = parameter["safe_distance"].as<double>();
+                        try {
+                            robot_data.buffer = parameter["buffer"].as<double>();
+                        } catch (...) {
+                            // Use the default buffer value defined in the virtual class
+                            DQ_robotics_extensions::VFIConfigurationFile::BASE_DATA data;
+                            robot_data.buffer = data.buffer;
+                        }
                         robot_data.vfi_gain = parameter["vfi_gain"].as<double>();
                         robot_data.direction = parameter["direction"].as<std::string>();
                         robot_data.tag = parameter["tag"].as<std::string>();
@@ -277,6 +292,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     file << "    robot_index: " << arg.robot_index << "\n";
                     file << "    joint_index: " << arg.joint_index << "\n";
                     file << "    safe_distance: " << arg.safe_distance << "\n";
+                    file << "    buffer: " << arg.buffer << "\n";
 
                     // vfi_gain with .0 for integers
                     file << "    vfi_gain: ";
@@ -318,6 +334,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     file << "    joint_index_one: " << arg.joint_index_one << "\n";
                     file << "    joint_index_two: " << arg.joint_index_two << "\n";
                     file << "    safe_distance: " << arg.safe_distance << "\n";
+                    file << "    buffer: " << arg.buffer << "\n";
 
                     // vfi_gain with .0 for integers
                     file << "    vfi_gain: ";

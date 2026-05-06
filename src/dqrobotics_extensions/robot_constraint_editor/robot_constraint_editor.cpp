@@ -210,6 +210,7 @@ void RobotConstraintEditor::edit_data(const std::string& tag, const std::string&
 
             // Double fields (also accept int via conversion)
             else if (assign_if_match(arg.safe_distance, "safe_distance")) modified = true;
+            else if (assign_if_match(arg.buffer, "buffer")) modified = true;
             else if (assign_if_match(arg.vfi_gain, "vfi_gain")) modified = true;
 
             // Vector fields
@@ -253,6 +254,7 @@ void RobotConstraintEditor::edit_data(const std::string& tag, const std::string&
 
             // Double fields
             else if (assign_if_match(arg.safe_distance, "safe_distance")) modified = true;
+            else if (assign_if_match(arg.buffer, "buffer")) modified = true;
             else if (assign_if_match(arg.vfi_gain, "vfi_gain")) modified = true;
 
             // Vector fields
