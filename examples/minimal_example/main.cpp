@@ -33,6 +33,7 @@ int main()
     data.joint_index_one = 5;
     data.joint_index_two = 6;
     data.safe_distance = 2.3;
+    data.buffer = 0.4;
     data.vfi_gain = 5.1;
     data.direction = "RESTRICTED_ZONE";
     data.tag = "TAG_X1";
