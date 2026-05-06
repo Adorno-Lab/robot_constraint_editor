@@ -38,6 +38,7 @@ public:
     std::string config_file_;
     int vfi_file_version_ = 2; // default value
     bool zero_indexed_ = true; // default value
+    double buffer_ = 0.0;      // default value
     std::vector<Data> raw_data_;
     Impl()
     {
@@ -106,6 +107,7 @@ public:
                         env_data.robot_index = parameter["robot_index"].as<int>();
                         env_data.joint_index = parameter["joint_index"].as<int>();
                         env_data.safe_distance = parameter["safe_distance"].as<double>();
+                        env_data.buffer = parameter["buffer"].as<double>();
                         env_data.vfi_gain = parameter["vfi_gain"].as<double>();
                         env_data.direction = parameter["direction"].as<std::string>();
                         env_data.tag = parameter["tag"].as<std::string>();
@@ -277,6 +279,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     file << "    robot_index: " << arg.robot_index << "\n";
                     file << "    joint_index: " << arg.joint_index << "\n";
                     file << "    safe_distance: " << arg.safe_distance << "\n";
+                    file << "    buffer: " << arg.buffer << "\n";
 
                     // vfi_gain with .0 for integers
                     file << "    vfi_gain: ";
@@ -318,6 +321,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     file << "    joint_index_one: " << arg.joint_index_one << "\n";
                     file << "    joint_index_two: " << arg.joint_index_two << "\n";
                     file << "    safe_distance: " << arg.safe_distance << "\n";
+                    file << "    buffer: " << arg.buffer << "\n";
 
                     // vfi_gain with .0 for integers
                     file << "    vfi_gain: ";
