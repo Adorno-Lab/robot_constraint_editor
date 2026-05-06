@@ -38,7 +38,6 @@ public:
     std::string config_file_;
     int vfi_file_version_ = 2; // default value
     bool zero_indexed_ = true; // default value
-    double buffer_ = 0.0;      // default value
     std::vector<Data> raw_data_;
     Impl()
     {
