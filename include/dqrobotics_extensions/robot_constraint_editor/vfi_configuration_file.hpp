@@ -36,6 +36,7 @@ public:
     struct BASE_DATA{
         std::string vfi_type;
         double safe_distance;
+        double buffer;
         double vfi_gain;
         std::string direction;
         std::string tag;
