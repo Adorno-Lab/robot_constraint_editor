@@ -52,18 +52,26 @@ robots:
 
 environment_entities:
   - name: "..."
-    pose:
+    pose:                                       # translation and rotation
       translation: [x, y, z]
       rotation:    [w, x, y, z]
+    attached_direction: "k_"
+  - name: "..."
+    pose: [c1, c2, c3, c4, c5, c6, c7, c8]      # unit dual quaternion
     attached_direction: "k_"
 
 robot_entities:
   - name: "..."
     robot_index: 1
     joint_index: 7
-    offset:
+    offset:                                     # translation and rotation
       translation: [x, y, z]
       rotation:    [w, x, y, z]
+    attached_direction: "k_"
+  - name: "..."
+    robot_index: 1
+    joint_index: 7
+    offset: [c1, c2, c3, c4, c5, c6, c7, c8]    # unit dual quaternion
     attached_direction: "k_"
 
 vfi_array:
