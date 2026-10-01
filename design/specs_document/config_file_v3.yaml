@@ -6,10 +6,6 @@ metadata:
   generated_by: "robot_constraint_editor"
   source: "panda_example.ttt"
 
-conventions:
-  length_unit: "m"
-  pose_format: "TRANSLATION_QUATERNION"
-
 robots:
   - robot_index: 1
     name: "Franka"

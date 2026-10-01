@@ -25,7 +25,6 @@ The configuration file is composed of the following elements:
 | `vfi_file_version` | yes | Must be `3`. |
 | `zero_indexed` | yes | Index convention for `robot_index` and `joint_index`. |
 | `metadata` | no | Informational data. Ignored by the RCM. |
-| `conventions` | no | Units and pose format. |
 | `robots` | yes | The robot whose kinematic model is used by the constraints. |
 | `environment_entities` | no* | Named frames fixed in the workspace. |
 | `robot_entities` | yes | Named frames kinematically attached to a robot joint. |
@@ -45,10 +44,6 @@ metadata:
   description: "..."
   generated_by: "robot_constraint_editor"
   source: "..."
-
-conventions:
-  length_unit: "m"
-  pose_format: "TRANSLATION_QUATERNION"
 
 robots:
   - robot_index: 1
@@ -103,17 +98,6 @@ Optional. Readers must ignore it.
 | `generated_by` | Tool that generated the file (e.g., `"robot_constraint_editor"`). | string |
 | `source` | Origin of the geometric data (e.g., a CoppeliaSim scene). | string |
 
-### 3.2 `conventions`
-
-Optional. In V3, each parameter accepts a single value, which is also the default.
-The element exists so that future versions can add alternatives without changing
-the structure of the file.
-
-| Parameter | Possible values | Default |
-|---|---|---|
-| `length_unit` | `"m"` | `"m"` |
-| `pose_format` | `"TRANSLATION_QUATERNION"` | `"TRANSLATION_QUATERNION"` |
-
 ## 4. `robots`
 
 V3 supports a single robot. `robots` is a list to keep the structure compatible
@@ -129,17 +113,17 @@ with future multi-robot versions, but it must contain exactly one element.
 
 ### 5.1 Pose (`pose` and `offset`)
 
-Both `pose` and `offset` use the same structure:
+Both `pose` and `offset` describe a unit dual quaternion by means of its translation
+(a pure quaternion) and its rotation (a unit quaternion):
 
 | Parameter | Description | Type |
 |---|---|---|
-| `translation` | `[x, y, z]`, in meters. | list of 3 doubles |
-| `rotation` | Unit quaternion `[w, x, y, z]`, i.e., `r = w + x*i_ + y*j_ + z*k_`. | list of 4 doubles |
+| `translation` | Coefficients `[x, y, z]` of the pure quaternion `t = x*i_ + y*j_ + z*k_`, i.e., `vec3(t)`. Meters. | list of 3 doubles |
+| `rotation` | Coefficients `[w, x, y, z]` of the unit quaternion `r = w + x*i_ + y*j_ + z*k_`, i.e., `vec4(r)`. | list of 4 doubles |
 
 The corresponding unit dual quaternion is
 
 ```
-t = x*i_ + y*j_ + z*k_
 pose = r + 0.5*E_*t*r
 ```
 
@@ -279,7 +263,7 @@ A reader must reject the file if any of the following conditions is not met:
 | Attached direction hard-coded to `k_` | `attached_direction` per entity (default `"k_"`) |
 | `robot_index`, `joint_index` in each VFI | `robot_index`, `joint_index` in each robot entity |
 | `robot_index_one/two`, `joint_index_one/two` in each VFI | Taken from `entity_one`/`entity_two` |
-| — | `robots`, `metadata`, `conventions` |
+| — | `robots`, `metadata` |
 | `"LINESEGMENT"` (three objects) | Not included in V3 |
 
 V2 files remain valid and can still be loaded with the CoppeliaSim-based RCM
