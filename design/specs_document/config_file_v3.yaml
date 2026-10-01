@@ -27,9 +27,7 @@ environment_entities:
       translation: [0.45, -0.20, 0.30]
       rotation:    [1.0, 0.0, 0.0, 0.0]
   - name: "obs_sphere"
-    pose:
-      translation: [0.40, 0.25, 0.45]
-      rotation:    [1.0, 0.0, 0.0, 0.0]
+    pose: [1.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.125, 0.225]
 
 robot_entities:
   - name: "rline"

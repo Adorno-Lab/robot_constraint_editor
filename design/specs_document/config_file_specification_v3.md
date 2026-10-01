@@ -77,9 +77,11 @@ vfi_array:
 
 - Mappings (`pose`, `offset`, entities, VFIs) are written in YAML block style.
 - Flow style (`[...]`) is used only for short lists of values: `translation`,
-  `rotation`, and the entity lists of the `vfi_array`.
-- Writers should use at least 10 significant digits for floating-point values, so
-  that unit quaternions remain unit after a save/load cycle.
+  `rotation`, the 8-element form of `pose`/`offset`, and the entity lists of the
+  `vfi_array`.
+- Writers must use 17 significant digits for the coefficients of `pose`/`offset`
+  (i.e., `std::numeric_limits<double>::max_digits10`), so that the values are
+  recovered exactly after a save/load cycle.
 
 ## 3. Header
 
@@ -113,8 +115,22 @@ with future multi-robot versions, but it must contain exactly one element.
 
 ### 5.1 Pose (`pose` and `offset`)
 
-Both `pose` and `offset` describe a unit dual quaternion by means of its translation
-(a pure quaternion) and its rotation (a unit quaternion):
+Both `pose` and `offset` describe a unit dual quaternion `x`. They can be written
+in either of the two forms below. The reader identifies the form from the YAML
+node type (mapping or sequence), so no additional field is required. Each
+`pose`/`offset` is parsed independently; therefore, both forms can be used in the
+same file.
+
+The two keys have different names because they are expressed in different frames
+(see Sections 6 and 7).
+
+#### 5.1.1 Translation and rotation (mapping)
+
+```yaml
+pose:
+  translation: [x, y, z]
+  rotation:    [w, x, y, z]
+```
 
 | Parameter | Description | Type |
 |---|---|---|
@@ -124,14 +140,43 @@ Both `pose` and `offset` describe a unit dual quaternion by means of its transla
 The corresponding unit dual quaternion is
 
 ```
-pose = r + 0.5*E_*t*r
+x = r + 0.5*E_*t*r
 ```
 
-Readers must reject a rotation whose norm differs from 1 by more than `1e-5`,
-and normalize it otherwise.
+#### 5.1.2 Unit dual quaternion (sequence)
 
-The two keys have different names because they are expressed in different frames
-(see Sections 6 and 7).
+```yaml
+pose: [c1, c2, c3, c4, c5, c6, c7, c8]
+```
+
+The 8 coefficients of `x`, i.e., `vec8(x)`, in the order used by `DQ::vec8()` and
+the `DQ(VectorXd)` constructor:
+
+```
+x = (c1 + c2*i_ + c3*j_ + c4*k_) + E_*(c5 + c6*i_ + c7*j_ + c8*k_)
+```
+
+where `c1`–`c4` are the primary part `P(x)` and `c5`–`c8` the dual part `D(x)`. The
+sequence must contain exactly 8 numbers.
+
+This form is convenient to paste values obtained in code (e.g., `vec8(x)`), but it
+is not recommended for manual editing: since the dual part combines translation
+and rotation, modifying a single coefficient breaks the unit condition.
+
+#### 5.1.3 Normalization
+
+Each `pose`/`offset` must be a unit dual quaternion within a tolerance of `1e-10`.
+The reader throws an exception if the tolerance is exceeded; otherwise, it
+normalizes the value (`x.normalize()`). Normalization is required because the
+DQ Robotics library uses a threshold of `1e-12` (`DQ_threshold`), and some
+methods used by the RCM (e.g., `DQ::translation()`) throw an exception for
+non-unit dual quaternions.
+
+#### 5.1.4 Writing
+
+The robot_constraint_editor writes the mapping form (Section 5.1.1) by default,
+and may provide an option to write the sequence form (Section 5.1.2). A single
+form is used in the whole file.
 
 ### 5.2 `attached_direction`
 
@@ -247,7 +292,9 @@ A reader must reject the file if any of the following conditions is not met:
    and `entity_two` in `robot_entities`.
 5. Each entity list in the `vfi_array` contains exactly one element.
 6. `joint_index` and `robot_index` are within the ranges of Sections 4 and 7.
-7. Rotations are unit quaternions (Section 5.1).
+7. Each `pose`/`offset` is either a mapping with `translation` (3 numbers) and
+   `rotation` (4 numbers), or a sequence of 8 numbers, and is a unit dual
+   quaternion within the tolerance of Section 5.1.3.
 8. `attached_direction`, primitive types, and `direction` take one of the listed values.
 9. The primitive combination is supported (Sections 8.1 and 8.2).
 10. Tags are unique.
