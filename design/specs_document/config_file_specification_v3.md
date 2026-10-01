@@ -187,8 +187,9 @@ form is used in the whole file.
 
 ### 5.2 `attached_direction`
 
-The attached direction defines the line orientation (`LINE`, `LINE_ANGLE`) or the
-plane normal (`PLANE`), expressed in the entity frame. Given the entity rotation
+The attached direction defines the line orientation (`LINE`, `LINE_ANGLE`, and the
+line entity of `LINESEGMENT`) or the plane normal (`PLANE`), expressed in the
+entity frame. Given the entity rotation
 `r`, the direction in the reference frame is `r*d*r.conj()`.
 
 | Possible values | Default |
@@ -197,7 +198,8 @@ plane normal (`PLANE`), expressed in the entity frame. Given the entity rotation
 
 Any other direction is obtained by rotating the entity frame. The sign is useful
 for `PLANE` primitives, in which the normal defines the side of the plane that
-the VFI refers to. The parameter is ignored for `POINT` primitives.
+the VFI refers to. The parameter is ignored for `POINT` primitives and for the
+two point entities of `LINESEGMENT`.
 
 ## 6. `environment_entities`
 
@@ -240,51 +242,112 @@ the same `DQ_Kinematics` model (including its end effector) used at runtime.
 
 ## 8. `vfi_array`
 
+V3 accepts every primitive type defined in V2. The primitive types and their
+combinations listed in Sections 8.1 and 8.2 are valid in the file, regardless of
+whether they are currently implemented by the RCM (see Section 8.4).
+
 The entity lists (`entity_*`) contain names defined in `environment_entities` or
-`robot_entities`. They are lists to support, in future versions, primitives
-described by more than one entity. In V3, each list must contain exactly one
-element.
+`robot_entities`. The number of names depends on the primitive type:
+
+| Primitive type | Number of entities |
+|---|---|
+| `"POINT"`, `"LINE"`, `"PLANE"`, `"LINE_ANGLE"` | 1 |
+| `"LINESEGMENT"` | 3 (see Section 8.3) |
 
 ### 8.1 `"ENVIRONMENT_TO_ROBOT"`
 
 | Parameter | Description/Possible values | Type | Required |
 |---|---|---|---|
 | `vfi_type` | `"ENVIRONMENT_TO_ROBOT"` | string | yes |
-| `entity_environment` | `[environment_entity_name]` | string list | yes |
-| `entity_robot` | `[robot_entity_name]` | string list | yes |
-| `entity_environment_primitive_type` | `"POINT"`, `"LINE"`, `"PLANE"`, `"LINE_ANGLE"` | string | yes |
-| `entity_robot_primitive_type` | `"POINT"`, `"LINE_ANGLE"` | string | yes |
+| `entity_environment` | `[environment_entity_name, ...]` | string list | yes |
+| `entity_robot` | `[robot_entity_name, ...]` | string list | yes |
+| `entity_environment_primitive_type` | `"POINT"`, `"LINE"`, `"PLANE"`, `"LINESEGMENT"`, `"LINE_ANGLE"` | string | yes |
+| `entity_robot_primitive_type` | `"POINT"`, `"LINE"`, `"PLANE"`, `"LINESEGMENT"`, `"LINE_ANGLE"` | string | yes |
 | `safe_distance` | Meters. Degrees for `LINE_ANGLE`. | double | yes |
 | `buffer` | Meters. Degrees for `LINE_ANGLE`. Default: `0.0`. | double | no |
 | `vfi_gain` | Positive gain. | double | yes |
 | `direction` | `"RESTRICTED_ZONE"`, `"SAFE_ZONE"` | string | yes |
 | `tag` | Unique identifier of the VFI. | string | yes |
 
-Supported combinations (robot primitive – environment primitive):
-
-| Robot | Environment | VFI class |
-|---|---|---|
-| `POINT` | `POINT` | `RPOINT_TO_POINT` |
-| `POINT` | `LINE` | `RPOINT_TO_LINE` |
-| `POINT` | `PLANE` | `RPOINT_TO_PLANE` |
-| `LINE_ANGLE` | `LINE_ANGLE` | `RLINE_TO_LINE_ANGLE` |
-
 ### 8.2 `"ROBOT_TO_ROBOT"`
 
 | Parameter | Description/Possible values | Type | Required |
 |---|---|---|---|
 | `vfi_type` | `"ROBOT_TO_ROBOT"` | string | yes |
-| `entity_one` | `[robot_entity_name]` | string list | yes |
-| `entity_two` | `[robot_entity_name]` | string list | yes |
-| `entity_one_primitive_type` | `"POINT"` | string | yes |
-| `entity_two_primitive_type` | `"POINT"` | string | yes |
-| `safe_distance` | Meters. | double | yes |
-| `buffer` | Meters. Default: `0.0`. Reserved: the RCM currently ignores it for this type. | double | no |
+| `entity_one` | `[robot_entity_name, ...]` | string list | yes |
+| `entity_two` | `[robot_entity_name, ...]` | string list | yes |
+| `entity_one_primitive_type` | `"POINT"`, `"LINE"`, `"PLANE"`, `"LINESEGMENT"`, `"LINE_ANGLE"` | string | yes |
+| `entity_two_primitive_type` | `"POINT"`, `"LINE"`, `"PLANE"`, `"LINESEGMENT"`, `"LINE_ANGLE"` | string | yes |
+| `safe_distance` | Meters. Degrees for `LINE_ANGLE`. | double | yes |
+| `buffer` | Meters. Degrees for `LINE_ANGLE`. Default: `0.0`. | double | no |
 | `vfi_gain` | Positive gain. | double | yes |
-| `direction` | `"RESTRICTED_ZONE"`, `"SAFE_ZONE"`. Reserved: the RCM currently uses `"RESTRICTED_ZONE"`. | string | yes |
+| `direction` | `"RESTRICTED_ZONE"`, `"SAFE_ZONE"` | string | yes |
 | `tag` | Unique identifier of the VFI. | string | yes |
 
-Supported combination: `POINT` – `POINT` (`RPOINT_TO_POINT`).
+### 8.3 `"LINESEGMENT"`
+
+As in V2, a line segment is described by three entities, written in the following
+order:
+
+1. the entity that defines the line (its position and `attached_direction`), and
+2. the two entities representing the points on the line that delimit the segment.
+
+The two points must lie on the line. The three entities must belong to the same
+entity table, and, for robot entities, they must have the same `robot_index` and
+`joint_index`.
+
+```yaml
+robot_entities:
+  - name: "link7_line"
+    robot_index: 1
+    joint_index: 7
+    offset:
+      translation: [0.0, 0.0, 0.0]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+    attached_direction: "k_"
+  - name: "link7_point_1"
+    robot_index: 1
+    joint_index: 7
+    offset:
+      translation: [0.0, 0.0, -0.05]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+  - name: "link7_point_2"
+    robot_index: 1
+    joint_index: 7
+    offset:
+      translation: [0.0, 0.0, 0.10]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+
+vfi_array:
+  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+    entity_environment: ["Plane"]
+    entity_robot: ["link7_line", "link7_point_1", "link7_point_2"]
+    entity_environment_primitive_type: "PLANE"
+    entity_robot_primitive_type: "LINESEGMENT"
+    safe_distance: 0.05
+    buffer: 0.0
+    vfi_gain: 1.0
+    direction: "RESTRICTED_ZONE"
+    tag: "C6"
+```
+
+### 8.4 RCM support (informative)
+
+The RCM currently implements the following subset. Other primitive types and
+combinations are valid in the file, but the RCM throws an exception when the
+corresponding constraint is built.
+
+| VFI type | Robot (one) | Environment (two) | VFI class |
+|---|---|---|---|
+| `ENVIRONMENT_TO_ROBOT` | `POINT` | `POINT` | `RPOINT_TO_POINT` |
+| `ENVIRONMENT_TO_ROBOT` | `POINT` | `LINE` | `RPOINT_TO_LINE` |
+| `ENVIRONMENT_TO_ROBOT` | `POINT` | `PLANE` | `RPOINT_TO_PLANE` |
+| `ENVIRONMENT_TO_ROBOT` | `LINE_ANGLE` | `LINE_ANGLE` | `RLINE_TO_LINE_ANGLE` |
+| `ROBOT_TO_ROBOT` | `POINT` | `POINT` | `RPOINT_TO_POINT` |
+
+Additionally, for `ROBOT_TO_ROBOT`, the RCM currently uses `"RESTRICTED_ZONE"`
+regardless of `direction`, and ignores `buffer`. Both fields are kept for future
+use.
 
 ## 9. Validation rules
 
@@ -297,14 +360,19 @@ A reader must reject the file if any of the following conditions is not met:
 4. Every name in the `vfi_array` exists in the corresponding entity table:
    `entity_environment` in `environment_entities`; `entity_robot`, `entity_one`,
    and `entity_two` in `robot_entities`.
-5. Each entity list in the `vfi_array` contains exactly one element.
-6. `joint_index` and `robot_index` are within the ranges of Sections 4 and 7.
-7. Each `pose`/`offset` is either a mapping with `translation` (3 numbers) and
+5. The number of names in each entity list matches its primitive type
+   (Section 8).
+6. The entities of a `LINESEGMENT` attached to a robot have the same
+   `robot_index` and `joint_index` (Section 8.3).
+7. `joint_index` and `robot_index` are within the ranges of Sections 4 and 7.
+8. Each `pose`/`offset` is either a mapping with `translation` (3 numbers) and
    `rotation` (4 numbers), or a sequence of 8 numbers, and is a unit dual
    quaternion within the tolerance of Section 5.1.3.
-8. `attached_direction`, primitive types, and `direction` take one of the listed values.
-9. The primitive combination is supported (Sections 8.1 and 8.2).
+9. `attached_direction`, primitive types, and `direction` take one of the listed values.
 10. Tags are unique.
+
+Whether a primitive combination is implemented is not a file validation rule; it
+is checked by the RCM when the constraints are built (Section 8.4).
 
 ## 10. Differences with respect to V2
 
@@ -318,7 +386,8 @@ A reader must reject the file if any of the following conditions is not met:
 | `robot_index`, `joint_index` in each VFI | `robot_index`, `joint_index` in each robot entity |
 | `robot_index_one/two`, `joint_index_one/two` in each VFI | Taken from `entity_one`/`entity_two` |
 | — | `robots`, `metadata` |
-| `"LINESEGMENT"` (three objects) | Not included in V3 |
+| `"LINESEGMENT"`: three CoppeliaSim objects (line, point, point) | `"LINESEGMENT"`: three entities (line, point, point) |
+| `"LINEANGLE"` (as written in the V2 document) | `"LINE_ANGLE"` only (as accepted by the RCM); `"LINEANGLE"` is rejected |
 
 V2 files remain valid and can still be loaded with the CoppeliaSim-based RCM
 constructor.
