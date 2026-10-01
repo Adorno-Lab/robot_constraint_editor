@@ -156,8 +156,7 @@ the `DQ(VectorXd)` constructor:
 x = (c1 + c2*i_ + c3*j_ + c4*k_) + E_*(c5 + c6*i_ + c7*j_ + c8*k_)
 ```
 
-where `c1`–`c4` are the primary part `P(x)` and `c5`–`c8` the dual part `D(x)`. The
-sequence must contain exactly 8 numbers.
+The sequence must contain exactly 8 numbers.
 
 This form is convenient to paste values obtained in code (e.g., `vec8(x)`), but it
 is not recommended for manual editing: since the dual part combines translation
