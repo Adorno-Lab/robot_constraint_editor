@@ -34,25 +34,21 @@ endif()
 
 
 # By default, the library is built from the local sources of this repository.
-# Use -DUSE_INSTALLED_LIBRARY=ON to use the installed library instead.
+# Use -DUSE_INSTALLED_LIBRARY=ON to use the installed library (find_package) instead.
 option(USE_INSTALLED_LIBRARY "Use the installed robot_constraint_editor library instead of the local sources" OFF)
 
-if(NOT USE_INSTALLED_LIBRARY)
-    # The target defined by the root CMakeLists.txt is also named robot_constraint_editor
+if(USE_INSTALLED_LIBRARY)
+    find_package(robot_constraint_editor REQUIRED)
+else()
+    # Defines the robot_constraint_editor::robot_constraint_editor target from the local sources
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../.. ${CMAKE_CURRENT_BINARY_DIR}/robot_constraint_editor)
 endif()
 
 add_executable(${PROJECT_NAME}
                ${PROJECT_NAME}.cpp)
 
-if(NOT USE_INSTALLED_LIBRARY)
-    # The local headers take precedence over the installed ones
-    target_include_directories(${PROJECT_NAME} BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-endif()
-
 target_link_libraries(${PROJECT_NAME}
-           robot_constraint_editor
-           dqrobotics
+           robot_constraint_editor::robot_constraint_editor
 )
 
 # COPY the Yaml config files to the build folder

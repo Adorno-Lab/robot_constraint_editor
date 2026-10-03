@@ -43,14 +43,12 @@ jobs:
       # Inline commands (instead of scripts run with sh) so that any failure stops the job
       - name: Build this project
         run: |
-          mkdir -p build && cd build
-          cmake ..
-          make -j$(nproc)
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j$(nproc)
 
       - name: Install this project
         run: |
-          cd build
-          sudo make install
+          sudo cmake --install build
           sudo ldconfig
 
       - name: Build tests
@@ -69,10 +67,11 @@ jobs:
              ./examples
              ./minimal_example_v3
 
+      # Uses the installed library through find_package(robot_constraint_editor)
       - name: Build and run tests_v3
         run: |
              cd examples/tests_v3
              mkdir -p build && cd build
-             cmake ..
+             cmake .. -DUSE_INSTALLED_LIBRARY=ON
              make
              ./tests_v3
