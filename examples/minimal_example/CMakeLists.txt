@@ -39,11 +39,13 @@ include_directories(${PROJECT_NAME}  include)
 include_directories(../../include)
 add_library(vfi_config_yaml
            ../../src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.cpp
+           ../../src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_v3.cpp
            ../../src/dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.cpp
            ../../src/dqrobotics_extensions/robot_constraint_editor/utils.cpp
 )
 target_link_libraries(vfi_config_yaml
            yaml-cpp::yaml-cpp
+           dqrobotics
 )
 
 add_executable(${PROJECT_NAME} main.cpp
@@ -54,10 +56,22 @@ target_link_libraries(${PROJECT_NAME}
            yaml-cpp::yaml-cpp
 )
 
-# COPY the Yaml config file to the build folder
-set(YAML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../design/specs_document/config_file.yaml)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${YAML_FILE}
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+# Minimal example for version 3 configuration files
+add_executable(minimal_example_v3 main_v3.cpp
+           )
+
+target_link_libraries(minimal_example_v3
+           vfi_config_yaml
+           dqrobotics
+)
+
+# COPY the Yaml config files to the build folder
+set(YAML_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../design/specs_document/config_file.yaml
+               ${CMAKE_CURRENT_SOURCE_DIR}/../../design/specs_document/config_file_v3.yaml)
+foreach(TARGET_NAME ${PROJECT_NAME} minimal_example_v3)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${YAML_FILES}
+            $<TARGET_FILE_DIR:${TARGET_NAME}>)
+endforeach()
 

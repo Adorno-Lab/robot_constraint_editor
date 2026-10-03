@@ -60,6 +60,15 @@ jobs:
              cmake ..
              make
 
+      - name: Build and run minimal examples
+        run: |
+             cd examples/minimal_example
+             mkdir -p build && cd build
+             cmake ..
+             make
+             ./examples
+             ./minimal_example_v3
+
       - name: Build and run tests_v3
         run: |
              cd examples/tests_v3

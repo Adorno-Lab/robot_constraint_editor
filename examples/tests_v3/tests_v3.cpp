@@ -1,4 +1,5 @@
 #include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
+#include <dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp>
 #include <dqrobotics/DQ.h>
 #include <cmath>
 #include <cstdio>
@@ -128,6 +129,28 @@ File::DOCUMENT_V3 save_and_reload(const File::DOCUMENT_V3& document, const std::
     file->save_document(reloaded, SAVED_FILE_2);
     check(read_file(SAVED_FILE) == read_file(SAVED_FILE_2), description + ": save -> load -> save gives the same file");
     return reloaded;
+}
+
+/**
+ * @brief throws returns true if function throws a std::runtime_error whose message contains expected_message.
+ */
+template<typename FUNCTION>
+bool throws(FUNCTION function, const std::string& expected_message)
+{
+    try {
+        function();
+    } catch (const std::runtime_error& e) {
+        return contains(e.what(), expected_message);
+    }
+    return false;
+}
+
+std::vector<std::string> tags(const File::DOCUMENT_V3& document)
+{
+    std::vector<std::string> result;
+    for (const auto& data : document.vfi_array)
+        result.push_back(std::visit([](const auto& arg) { return arg.tag; }, data));
+    return result;
 }
 
 /**
@@ -447,6 +470,151 @@ void test_save_v2()
     check(read_file(SAVED_FILE) == read_file(SAVED_FILE_2), "save_document(DOCUMENT_V2) is equivalent to save_data()");
 }
 
+void test_editor_v3()
+{
+    std::cout << "\n--- RobotConstraintEditor (version 3) ---" << std::endl;
+    using Strings = std::vector<std::string>;
+    auto ri = std::make_shared<VFIConfigurationFileYaml>();
+    RobotConstraintEditor rce(ri);
+    check(rce.get_vfi_file_version() == 2, "The editor contains version 2 data by default");
+
+    rce.load_data("config_file_v3.yaml");
+    check(rce.get_vfi_file_version() == 3, "Loading a V3 file -> version 3");
+    check(tags(rce.get_document()) == Strings{"C1", "C2", "C3", "C4", "C5"}, "The order of the VFIs is kept");
+
+    // Version 2 methods are not available
+    File::ROBOT_TO_ROBOT_DATA v2_data;
+    v2_data.tag = "X";
+    check(throws([&]{ rce.get_data(); }, "requires version 2 data"), "get_data() throws in version 3");
+    check(throws([&]{ rce.add_data(v2_data); }, "requires version 2 data"), "add_data(V2) throws in version 3");
+    check(throws([&]{ rce.save_data(SAVED_FILE, 2, false); }, "requires version 2 data"), "save_data() throws in version 3");
+
+    // Entities
+    File::ROBOT_ENTITY elbow_sphere;
+    elbow_sphere.name = "Plane";
+    elbow_sphere.robot_index = 1;
+    elbow_sphere.joint_index = 4;
+    elbow_sphere.offset = {{0.0, 0.0, 0.1}, {1.0, 0.0, 0.0, 0.0}};
+    check(throws([&]{ rce.add_robot_entity(elbow_sphere); }, "Entity name 'Plane' is being used"), "Duplicated entity name is rejected");
+    elbow_sphere.name = "elbow_sphere";
+    rce.add_robot_entity(elbow_sphere);
+    check(rce.get_document().robot_entities.back().name == "elbow_sphere", "add_robot_entity()");
+
+    // VFIs
+    File::ENVIRONMENT_TO_ROBOT_DATA_V3 c6;
+    c6.vfi_type = "ENVIRONMENT_TO_ROBOT";
+    c6.entity_environment = {"Plane"};
+    c6.entity_robot = {"elbow_sphere"};
+    c6.entity_environment_primitive_type = "PLANE";
+    c6.entity_robot_primitive_type = "POINT";
+    c6.safe_distance = 0.1;
+    c6.vfi_gain = 1.0;
+    c6.direction = "RESTRICTED_ZONE";
+    c6.tag = "C1";
+    check(throws([&]{ rce.add_data(c6); }, "Tag 'C1' is being used"), "Duplicated tag is rejected");
+    c6.tag = "C6";
+    rce.add_data(c6);
+    check(tags(rce.get_document()).back() == "C6", "add_data(V3) adds the VFI at the end");
+
+    // edit_data
+    rce.edit_data("C3", "safe_distance", 0.08);
+    rce.edit_data("C3", "entity_robot", Strings{"elbow_sphere"});
+    rce.edit_data("C3", "tag", std::string("C33"));
+    const auto c33 = std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(rce.get_document().vfi_array.at(2));
+    check(c33.tag == "C33" && c33.safe_distance == 0.08 && c33.entity_robot == Strings{"elbow_sphere"},
+          "edit_data() modifies safe_distance, entity_robot, and tag");
+    check(throws([&]{ rce.edit_data("C33", "tag", std::string("C1")); }, "Tag 'C1' is being used"), "edit_data() rejects a used tag");
+    check(throws([&]{ rce.edit_data("C2", "vfi_type", std::string("ENVIRONMENT_TO_ROBOT")); }, "vfi_type cannot be edited"),
+          "edit_data() rejects vfi_type");
+    check(throws([&]{ rce.edit_data("C2", "entity_environment", Strings{"Plane"}); }, "Key 'entity_environment' not found"),
+          "edit_data() rejects keys of other VFI types");
+    check(throws([&]{ rce.edit_data("C1", "safe_distance", std::string("x")); }, "Type mismatch"), "edit_data() rejects wrong types");
+    check(throws([&]{ rce.edit_data("C9", "safe_distance", 1.0); }, "Tag 'C9' not found"), "edit_data() rejects unknown tags");
+
+    // rename_entity updates the VFIs
+    check(throws([&]{ rce.rename_entity("rsphere", "Plane"); }, "is being used"), "rename_entity() rejects a used name");
+    rce.rename_entity("rsphere", "tool_sphere");
+    auto document = rce.get_document();
+    check(document.robot_entities.at(1).name == "tool_sphere"
+              && std::get<File::ROBOT_TO_ROBOT_DATA_V3>(document.vfi_array.at(1)).entity_two == Strings{"tool_sphere"}
+              && std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(document.vfi_array.at(3)).entity_robot == Strings{"tool_sphere"}
+              && std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(document.vfi_array.at(4)).entity_robot == Strings{"tool_sphere"},
+          "rename_entity() updates the entity and the VFIs that use it");
+
+    // replace_environment_entity with a new name and pose
+    File::ENVIRONMENT_ENTITY table = document.environment_entities.at(1);
+    table.name = "Table";
+    table.pose.translation = {0.0, 0.0, 0.1};
+    rce.replace_environment_entity("Plane", table);
+    document = rce.get_document();
+    check(document.environment_entities.at(1).name == "Table" && document.environment_entities.at(1).pose.translation.at(2) == 0.1
+              && std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(document.vfi_array.at(2)).entity_environment == Strings{"Table"}
+              && std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(document.vfi_array.at(5)).entity_environment == Strings{"Table"},
+          "replace_environment_entity() updates the entity and the VFIs that use it");
+
+    // remove_entity
+    check(throws([&]{ rce.remove_entity("tool_sphere"); }, "is used by the VFI with tag 'C2'"), "remove_entity() rejects an entity in use");
+    check(throws([&]{ rce.remove_entity("Cylinder"); }, "is used by the VFI with tag 'C4'"), "remove_entity() reports the VFI");
+    rce.remove_data("C4");
+    rce.remove_entity("Cylinder");
+    check(rce.get_document().environment_entities.size() == 3, "remove_entity() after removing the VFI");
+    check(throws([&]{ rce.remove_entity("unknown"); }, "Entity 'unknown' not found"), "remove_entity() rejects unknown names");
+
+    // replace_data keeps the position
+    File::ROBOT_TO_ROBOT_DATA_V3 c2 = std::get<File::ROBOT_TO_ROBOT_DATA_V3>(rce.get_document().vfi_array.at(1));
+    c2.tag = "C2b";
+    c2.safe_distance = 0.25;
+    rce.replace_data("C2", c2);
+    check(tags(rce.get_document()) == Strings{"C1", "C2b", "C33", "C5", "C6"}, "replace_data(V3) keeps the position");
+
+    // Save and load
+    rce.validate();
+    rce.save_document(SAVED_FILE);
+    RobotConstraintEditor rce2(std::make_shared<VFIConfigurationFileYaml>());
+    rce2.load_data(SAVED_FILE);
+    rce2.save_document(SAVED_FILE_2);
+    check(read_file(SAVED_FILE) == read_file(SAVED_FILE_2), "save_document() -> load_data() -> save_document() gives the same file");
+
+    // Invalid documents are not saved
+    write_file("original content");
+    rce.edit_data("C6", "entity_robot", Strings{"undefined_entity"});
+    check(throws([&]{ rce.validate(); }, "'undefined_entity' is not defined"), "validate() detects an undefined entity");
+    check(throws([&]{ rce.save_document(TMP_FILE); }, "'undefined_entity' is not defined") && read_file(TMP_FILE) == "original content",
+          "save_document() rejects an invalid document without modifying the file");
+
+    // A new document from scratch
+    RobotConstraintEditor rce3(std::make_shared<VFIConfigurationFileYaml>());
+    File::DOCUMENT_V3 empty_document;
+    empty_document.zero_indexed = false;
+    rce3.set_document(empty_document);
+    rce3.set_robot({1, "R", 6});
+    rce3.add_robot_entity({"p1", 1, 2, {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0, 0.0}}});
+    rce3.add_robot_entity({"p2", 1, 6, {{0.0, 0.0, 0.1}, {1.0, 0.0, 0.0, 0.0}}});
+    File::ROBOT_TO_ROBOT_DATA_V3 r2r;
+    r2r.vfi_type = "ROBOT_TO_ROBOT";
+    r2r.entity_one = {"p1"};
+    r2r.entity_two = {"p2"};
+    r2r.entity_one_primitive_type = "POINT";
+    r2r.entity_two_primitive_type = "POINT";
+    r2r.safe_distance = 0.2;
+    r2r.vfi_gain = 1.0;
+    r2r.direction = "RESTRICTED_ZONE";
+    r2r.tag = "R1";
+    rce3.add_data(r2r);
+    rce3.save_document(SAVED_FILE);
+    auto file = std::make_shared<VFIConfigurationFileYaml>();
+    file->load_data(SAVED_FILE);
+    const auto saved = std::get<File::DOCUMENT_V3>(file->get_document());
+    check(saved.robots.at(0).dim_configuration == 6 && saved.robot_entities.size() == 2 && tags(saved) == Strings{"R1"}
+              && !contains(read_file(SAVED_FILE), "environment_entities"),
+          "set_document() -> add entities and VFIs -> save_document()");
+
+    // Loading a version 2 file switches to version 2
+    rce.load_data("config_file.yaml");
+    check(rce.get_vfi_file_version() == 2 && !rce.get_data().empty(), "Loading a V2 file after a V3 file -> version 2");
+    check(throws([&]{ rce.get_document(); }, "requires version 3 data"), "get_document() throws in version 2");
+}
+
 } // namespace
 
 int main()
@@ -459,6 +627,7 @@ int main()
         test_v2_file();
         test_save_v3();
         test_save_v2();
+        test_editor_v3();
     } catch (const std::exception& e) {
         std::cout << "[FAIL] Unexpected exception: " << e.what() << std::endl;
         failures++;
