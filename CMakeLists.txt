@@ -38,6 +38,7 @@ include_directories(${PROJECT_NAME}  include)
 add_library(${PROJECT_NAME} SHARED
     src/dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.cpp
     src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.cpp
+    src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_v3.cpp
     src/dqrobotics_extensions/robot_constraint_editor/utils.cpp
 )
 
@@ -47,6 +48,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME}
         yaml-cpp
+        dqrobotics
 )
 
 SET_TARGET_PROPERTIES(${PROJECT_NAME}
@@ -64,5 +66,6 @@ INSTALL(TARGETS ${PROJECT_NAME}
 INSTALL(FILES
     include/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file.hpp
     include/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp
+    include/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_v3.hpp
     include/dqrobotics_extensions/robot_constraint_editor/utils.hpp
     DESTINATION "include/dqrobotics_extensions/robot_constraint_editor")

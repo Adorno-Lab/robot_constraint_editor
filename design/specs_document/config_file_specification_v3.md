@@ -118,7 +118,8 @@ vfi_array:
   `vfi_array`.
 - Writers must use 17 significant digits for the coefficients of `pose`/`offset`
   (i.e., `std::numeric_limits<double>::max_digits10`), so that the values are
-  recovered exactly after a save/load cycle.
+  recovered exactly after a save/load cycle and remain unit within
+  `DQ_threshold` (Section 5.1.3).
 
 ## 3. Header
 
@@ -199,14 +200,19 @@ This form is convenient to paste values obtained in code (e.g., `vec8(x)`), but 
 is not recommended for manual editing: since the dual part combines translation
 and rotation, modifying a single coefficient breaks the unit condition.
 
-#### 5.1.3 Normalization
+#### 5.1.3 Unit condition
 
-Each `pose`/`offset` must be a unit dual quaternion within a tolerance of `1e-10`.
-The reader throws an exception if the tolerance is exceeded; otherwise, it
-normalizes the value (`x.normalize()`). Normalization is required because the
-DQ Robotics library uses a threshold of `1e-12` (`DQ_threshold`), and some
-methods used by the RCM (e.g., `DQ::translation()`) throw an exception for
-non-unit dual quaternions.
+Each `pose`/`offset` must be a unit dual quaternion within a tolerance of
+`DQ_threshold` (`1e-12`), the threshold of the DQ Robotics library. That is,
+`is_unit(x)` must be true. The same tolerance is required by the methods used to
+extract the rotation and translation (`DQ::rotation()` and `DQ::translation()`).
+The reader throws an exception if the condition is not met. Values are not
+normalized.
+
+Therefore, the coefficients must be written with enough digits. For instance, the
+rotation of 90 degrees about the z-axis must be written as
+`[0.70710678118654757, 0.0, 0.0, 0.70710678118654757]`, since
+`[0.7071067812, 0.0, 0.0, 0.7071067812]` is not unit within `DQ_threshold`.
 
 #### 5.1.4 Writing
 
@@ -400,7 +406,7 @@ A reader must reject the file if any of the following conditions is not met:
 7. `joint_index` and `robot_index` are within the ranges of Sections 4 and 7.
 8. Each `pose`/`offset` is either a mapping with `translation` (3 numbers) and
    `rotation` (4 numbers), or a sequence of 8 numbers, and is a unit dual
-   quaternion within the tolerance of Section 5.1.3.
+   quaternion within `DQ_threshold` (Section 5.1.3).
 9. `attached_direction`, primitive types, and `direction` take one of the listed values.
 10. Tags are unique.
 

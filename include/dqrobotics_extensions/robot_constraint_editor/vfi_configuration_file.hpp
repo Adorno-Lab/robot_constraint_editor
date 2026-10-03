@@ -149,6 +149,12 @@ public:
     virtual std::vector<Data>  get_data() const = 0;
 
     /**
+     * @brief get_document gets the complete content of the loaded configuration file.
+     * @return A DOCUMENT_V2 or a DOCUMENT_V3, depending on the file version.
+     */
+    virtual Document get_document() const = 0;
+
+    /**
      * @brief get_vfi_file_version gets the configuration file version.
      * @return The desired file version.
      */
