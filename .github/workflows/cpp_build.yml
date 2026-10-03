@@ -30,17 +30,40 @@ jobs:
           make
           sudo make install
       
-      - name: Build this project
-        run: | 
+      - name: Install DQ Robotics
+        run: |
           git clone https://github.com/dqrobotics/cpp
-          sh ./cpp/.github/scripts/macos/build.sh    
+          cd cpp
+          mkdir -p build && cd build
+          cmake ..
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
 
-      - name: Install this project 
-        run: sh ./cpp/.github/scripts/macos/install.sh    
-          
+      # Inline commands (instead of scripts run with sh) so that any failure stops the job
+      - name: Build this project
+        run: |
+          mkdir -p build && cd build
+          cmake ..
+          make -j$(nproc)
+
+      - name: Install this project
+        run: |
+          cd build
+          sudo make install
+          sudo ldconfig
+
       - name: Build tests
         run: |
              cd examples/tests
              mkdir -p build && cd build
              cmake ..
              make
+
+      - name: Build and run tests_v3
+        run: |
+             cd examples/tests_v3
+             mkdir -p build && cd build
+             cmake ..
+             make
+             ./tests_v3
