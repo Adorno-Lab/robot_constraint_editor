@@ -19,7 +19,7 @@ std::string bool2string(const bool& flag)
 std::string join_vector(const std::vector<std::string>& vec, const std::string& delimiter) {
     std::string result;
     for (size_t i = 0; i < vec.size(); ++i) {
-        result += vec[i];
+        result += vec.at(i);
         if (i < vec.size() - 1) {
             result += delimiter;
         }
@@ -50,11 +50,11 @@ void VFIConfigurationFileData::show_data(const std::vector<VFIConfigurationFile:
     for (size_t i = 0; i < data.size(); ++i) {
         std::cout << "\n\n[" << i + 1 << "/" << data.size() << "] ";
 
-        if (std::holds_alternative<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>(data[i])) {
+        if (std::holds_alternative<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>(data.at(i))) {
             std::cout << "ENVIRONMENT_TO_ROBOT" << std::endl;
             std::cout << std::string(50, '-') << std::endl;
 
-            auto& env_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>(data[i]);
+            auto& env_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ENVIRONMENT_TO_ROBOT_DATA>(data.at(i));
 
             std::cout << std::left << std::setw(35) << "  vfi_type:" << env_data.vfi_type << std::endl;
             std::cout << std::setw(35) << "  cs_entity_environment:"
@@ -77,7 +77,7 @@ void VFIConfigurationFileData::show_data(const std::vector<VFIConfigurationFile:
             std::cout << "ROBOT_TO_ROBOT" << std::endl;
             std::cout << std::string(50, '-') << std::endl;
 
-            auto& robot_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_DATA>(data[i]);
+            auto& robot_data = std::get<DQ_robotics_extensions::VFIConfigurationFile::ROBOT_TO_ROBOT_DATA>(data.at(i));
 
             std::cout << std::left << std::setw(35) << "  vfi_type:" << robot_data.vfi_type << std::endl;
             std::cout << std::setw(35) << "  cs_entity_one:"

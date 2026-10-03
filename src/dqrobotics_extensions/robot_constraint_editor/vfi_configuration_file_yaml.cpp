@@ -150,7 +150,7 @@ public:
         std::array<double, N> values;
         try {
             for (std::size_t i = 0; i < N; ++i)
-                values[i] = node[i].as<double>();
+                values.at(i) = node[i].as<double>();
         } catch (const YAML::Exception&) {
             throw std::runtime_error(context + ": must be a list of " + std::to_string(N) + " numbers.");
         }
@@ -583,7 +583,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     // cs_entity_environment
                     file << "    cs_entity_environment: [";
                     for (size_t i = 0; i < arg.cs_entity_environment.size(); ++i) {
-                        file << "\"" << arg.cs_entity_environment[i] << "\"";
+                        file << "\"" << arg.cs_entity_environment.at(i) << "\"";
                         if (i < arg.cs_entity_environment.size() - 1) file << ", ";
                     }
                     file << "]\n";
@@ -591,7 +591,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     // cs_entity_robot
                     file << "    cs_entity_robot: [";
                     for (size_t i = 0; i < arg.cs_entity_robot.size(); ++i) {
-                        file << "\"" << arg.cs_entity_robot[i] << "\"";
+                        file << "\"" << arg.cs_entity_robot.at(i) << "\"";
                         if (i < arg.cs_entity_robot.size() - 1) file << ", ";
                     }
                     file << "]\n";
@@ -623,7 +623,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     // cs_entity_one
                     file << "    cs_entity_one: [";
                     for (size_t i = 0; i < arg.cs_entity_one.size(); ++i) {
-                        file << "\"" << arg.cs_entity_one[i] << "\"";
+                        file << "\"" << arg.cs_entity_one.at(i) << "\"";
                         if (i < arg.cs_entity_one.size() - 1) file << ", ";
                     }
                     file << "]\n";
@@ -631,7 +631,7 @@ void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                     // cs_entity_two
                     file << "    cs_entity_two: [";
                     for (size_t i = 0; i < arg.cs_entity_two.size(); ++i) {
-                        file << "\"" << arg.cs_entity_two[i] << "\"";
+                        file << "\"" << arg.cs_entity_two.at(i) << "\"";
                         if (i < arg.cs_entity_two.size() - 1) file << ", ";
                     }
                     file << "]\n";

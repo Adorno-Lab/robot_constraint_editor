@@ -237,7 +237,7 @@ void validate(const VFIConfigurationFile::DOCUMENT_V3& document)
         check_unique_name(entity.name, context);
         _check_pose(entity.pose, context + ", pose");
         _check_value(entity.attached_direction, ATTACHED_DIRECTIONS, context + ", attached_direction");
-        environment_entities[entity.name] = &entity;
+        environment_entities.emplace(entity.name, &entity);
     }
 
     for (std::size_t i = 0; i < document.robot_entities.size(); ++i)
@@ -254,7 +254,7 @@ void validate(const VFIConfigurationFile::DOCUMENT_V3& document)
                                      + "], found " + std::to_string(entity.joint_index) + ".");
         _check_pose(entity.offset, context + ", offset");
         _check_value(entity.attached_direction, ATTACHED_DIRECTIONS, context + ", attached_direction");
-        robot_entities[entity.name] = &entity;
+        robot_entities.emplace(entity.name, &entity);
     }
 
     // Rules 4, 5, 6, 9, and 10 for the VFIs

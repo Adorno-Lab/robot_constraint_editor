@@ -141,33 +141,33 @@ void test_example_file()
 
     const auto& doc = std::get<File::DOCUMENT_V3>(document);
     check(doc.metadata.source == "panda_example.ttt", "metadata.source");
-    check(doc.robots.size() == 1 && doc.robots[0].name == "Franka" && doc.robots[0].dim_configuration == 7, "robots");
+    check(doc.robots.size() == 1 && doc.robots.at(0).name == "Franka" && doc.robots.at(0).dim_configuration == 7, "robots");
     check(doc.environment_entities.size() == 4, "4 environment entities");
     check(doc.robot_entities.size() == 3, "3 robot entities");
     check(doc.vfi_array.size() == 5, "5 VFIs");
     check(doc.pose_format == File::POSE_FORMAT::TRANSLATION_ROTATION, "mixed pose forms -> TRANSLATION_ROTATION");
 
-    const auto& plane = doc.environment_entities[1];
-    check(plane.name == "Plane" && near(plane.pose.translation[2], 0.05) && plane.attached_direction == "k_", "Plane pose");
-    const auto& cylinder = doc.environment_entities[2];
+    const auto& plane = doc.environment_entities.at(1);
+    check(plane.name == "Plane" && near(plane.pose.translation.at(2), 0.05) && plane.attached_direction == "k_", "Plane pose");
+    const auto& cylinder = doc.environment_entities.at(2);
     check(cylinder.attached_direction == "k_", "Cylinder uses the default attached_direction");
 
-    const auto& sphere = doc.environment_entities[3];
+    const auto& sphere = doc.environment_entities.at(3);
     check(sphere.name == "obs_sphere"
-              && near(sphere.pose.translation[0], 0.4) && near(sphere.pose.translation[1], 0.25)
-              && near(sphere.pose.translation[2], 0.45) && near(sphere.pose.rotation[0], 1.0),
+              && near(sphere.pose.translation.at(0), 0.4) && near(sphere.pose.translation.at(1), 0.25)
+              && near(sphere.pose.translation.at(2), 0.45) && near(sphere.pose.rotation.at(0), 1.0),
           "obs_sphere (8 coefficients) -> translation [0.4, 0.25, 0.45]");
 
-    const auto& rsphere = doc.robot_entities[1];
+    const auto& rsphere = doc.robot_entities.at(1);
     check(rsphere.name == "rsphere" && rsphere.robot_index == 1 && rsphere.joint_index == 7
-              && near(rsphere.offset.translation[2], 0.05), "rsphere offset");
+              && near(rsphere.offset.translation.at(2), 0.05), "rsphere offset");
 
-    const auto& c1 = std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(doc.vfi_array[0]);
+    const auto& c1 = std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(doc.vfi_array.at(0));
     check(c1.tag == "C1" && c1.entity_environment == std::vector<std::string>{"x_inertial"}
               && c1.entity_robot == std::vector<std::string>{"rline"}
               && c1.entity_robot_primitive_type == "LINE_ANGLE" && near(c1.safe_distance, 5.0)
               && c1.direction == "SAFE_ZONE", "C1 (ENVIRONMENT_TO_ROBOT)");
-    const auto& c2 = std::get<File::ROBOT_TO_ROBOT_DATA_V3>(doc.vfi_array[1]);
+    const auto& c2 = std::get<File::ROBOT_TO_ROBOT_DATA_V3>(doc.vfi_array.at(1));
     check(c2.tag == "C2" && c2.entity_one == std::vector<std::string>{"r_base_sphere"}
               && c2.entity_two == std::vector<std::string>{"rsphere"} && near(c2.safe_distance, 0.3),
           "C2 (ROBOT_TO_ROBOT)");
@@ -185,7 +185,7 @@ void test_base_file()
     file->load_data(TMP_FILE);
     const auto doc = std::get<File::DOCUMENT_V3>(file->get_document());
     check(!doc.metadata.description.size() && doc.environment_entities.size() == 1, "Loads without metadata");
-    const auto& c1 = std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(doc.vfi_array[0]);
+    const auto& c1 = std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(doc.vfi_array.at(0));
     check(c1.buffer == 0.0, "buffer defaults to 0.0");
     check(c1.entity_robot.size() == 3, "LINESEGMENT with 3 entities");
 }
@@ -217,11 +217,11 @@ void test_unit_dual_quaternion_form()
     auto file = std::make_shared<VFIConfigurationFileYaml>();
     file->load_data(TMP_FILE);
     const auto doc = std::get<File::DOCUMENT_V3>(file->get_document());
-    const auto& pose = doc.environment_entities[0].pose;
-    check(near(pose.translation[0], 1.0) && near(pose.translation[1], 2.0) && near(pose.translation[2], 3.0),
+    const auto& pose = doc.environment_entities.at(0).pose;
+    check(near(pose.translation.at(0), 1.0) && near(pose.translation.at(1), 2.0) && near(pose.translation.at(2), 3.0),
           "Rotated pose -> translation [1, 2, 3]");
-    check(near(pose.rotation[0], cos(M_PI/4.0)) && near(pose.rotation[3], sin(M_PI/4.0)), "Rotated pose -> rotation");
-    check(near(doc.robot_entities[2].offset.translation[2], 0.10), "p2 offset -> translation [0, 0, 0.10]");
+    check(near(pose.rotation.at(0), cos(M_PI/4.0)) && near(pose.rotation.at(3), sin(M_PI/4.0)), "Rotated pose -> rotation");
+    check(near(doc.robot_entities.at(2).offset.translation.at(2), 0.10), "p2 offset -> translation [0, 0, 0.10]");
     check(doc.pose_format == File::POSE_FORMAT::UNIT_DUAL_QUATERNION, "Only 8 coefficients -> UNIT_DUAL_QUATERNION");
 
 }
