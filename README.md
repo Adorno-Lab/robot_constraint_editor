@@ -7,6 +7,12 @@ The library reads, edits, validates, and writes the YAML configuration files (ve
 See the [version 3 specification](design/specs_document/config_file_specification_v3.md).
 
 
+```shell
+git clone https://github.com/Adorno-Lab/robot_constraint_editor
+cd robot_constraint_editor
+```
+
+
 # Install
 
 > [!NOTE]
@@ -39,8 +45,6 @@ If you're installing any of the above without sudo, install them to the same cus
 ## Sudo users
 
 ```shell
-git clone https://github.com/Adorno-Lab/robot_constraint_editor
-cd robot_constraint_editor
 
 # 1. Configure: choose Release, and (optionally) where to install it.
 #    Omit -DCMAKE_INSTALL_PREFIX to use the system default (/usr/local on Linux).
@@ -58,8 +62,6 @@ sudo cmake --install build
 ## Non-sudo users
 
 ```shell
-git clone https://github.com/Adorno-Lab/robot_constraint_editor
-cd robot_constraint_editor
 
 # 1. Configure: choose Release, and install to your own prefix instead of a system path.
 cmake -S . -B build \
