@@ -51,39 +51,66 @@ robots:
     dim_configuration: 7
 
 environment_entities:
-  - name: "..."
+  -
+    name: "..."
     pose:                                       # translation and rotation
       translation: [x, y, z]
       rotation:    [w, x, y, z]
     attached_direction: "k_"
-  - name: "..."
+  -
+    name: "..."
     pose: [c1, c2, c3, c4, c5, c6, c7, c8]      # unit dual quaternion
     attached_direction: "k_"
 
 robot_entities:
-  - name: "..."
+  -
+    name: "..."
     robot_index: 1
     joint_index: 7
     offset:                                     # translation and rotation
       translation: [x, y, z]
       rotation:    [w, x, y, z]
     attached_direction: "k_"
-  - name: "..."
+  -
+    name: "..."
     robot_index: 1
     joint_index: 7
     offset: [c1, c2, c3, c4, c5, c6, c7, c8]    # unit dual quaternion
     attached_direction: "k_"
 
 vfi_array:
-  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
     ...
-  - vfi_type: "ROBOT_TO_ROBOT"
+  -
+    vfi_type: "ROBOT_TO_ROBOT"
     ...
 ```
 
 ### 2.1 Writing style
 
 - Mappings (`pose`, `offset`, entities, VFIs) are written in YAML block style.
+- In `environment_entities`, `robot_entities`, and `vfi_array`, each `-` is
+  written on its own line, and the parameters of the element go on the lines
+  below it. This separates the elements visually, as in V2:
+
+  ```yaml
+  robot_entities:
+    -
+      name: "..."
+      ...
+    -
+      name: "..."
+      ...
+
+  vfi_array:
+    -
+      vfi_type: "ENVIRONMENT_TO_ROBOT"
+      ...
+    -
+      vfi_type: "ROBOT_TO_ROBOT"
+      ...
+  ```
 - Flow style (`[...]`) is used only for short lists of values: `translation`,
   `rotation`, the 8-element form of `pose`/`offset`, and the entity lists of the
   `vfi_array`.
@@ -298,20 +325,23 @@ entity table, and, for robot entities, they must have the same `robot_index` and
 
 ```yaml
 robot_entities:
-  - name: "link7_line"
+  -
+    name: "link7_line"
     robot_index: 1
     joint_index: 7
     offset:
       translation: [0.0, 0.0, 0.0]
       rotation:    [1.0, 0.0, 0.0, 0.0]
     attached_direction: "k_"
-  - name: "link7_point_1"
+  -
+    name: "link7_point_1"
     robot_index: 1
     joint_index: 7
     offset:
       translation: [0.0, 0.0, -0.05]
       rotation:    [1.0, 0.0, 0.0, 0.0]
-  - name: "link7_point_2"
+  -
+    name: "link7_point_2"
     robot_index: 1
     joint_index: 7
     offset:
@@ -319,7 +349,8 @@ robot_entities:
       rotation:    [1.0, 0.0, 0.0, 0.0]
 
 vfi_array:
-  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
     entity_environment: ["Plane"]
     entity_robot: ["link7_line", "link7_point_1", "link7_point_2"]
     entity_environment_primitive_type: "PLANE"

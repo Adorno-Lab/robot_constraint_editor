@@ -12,38 +12,45 @@ robots:
     dim_configuration: 7
 
 environment_entities:
-  - name: "x_inertial"
+  -
+    name: "x_inertial"
     pose:
       translation: [0.0, 0.0, 0.0]
       rotation:    [1.0, 0.0, 0.0, 0.0]
     attached_direction: "k_"
-  - name: "Plane"
+  -
+    name: "Plane"
     pose:
       translation: [0.0, 0.0, 0.05]
       rotation:    [1.0, 0.0, 0.0, 0.0]
     attached_direction: "k_"
-  - name: "Cylinder"
+  -
+    name: "Cylinder"
     pose:
       translation: [0.45, -0.20, 0.30]
       rotation:    [1.0, 0.0, 0.0, 0.0]
-  - name: "obs_sphere"
+  -
+    name: "obs_sphere"
     pose: [1.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.125, 0.225]
 
 robot_entities:
-  - name: "rline"
+  -
+    name: "rline"
     robot_index: 1
     joint_index: 7
     offset:
       translation: [0.0, 0.0, 0.0]
       rotation:    [1.0, 0.0, 0.0, 0.0]
     attached_direction: "k_"
-  - name: "rsphere"
+  -
+    name: "rsphere"
     robot_index: 1
     joint_index: 7
     offset:
       translation: [0.0, 0.0, 0.05]
       rotation:    [1.0, 0.0, 0.0, 0.0]
-  - name: "r_base_sphere"
+  -
+    name: "r_base_sphere"
     robot_index: 1
     joint_index: 1
     offset:
@@ -51,7 +58,8 @@ robot_entities:
       rotation:    [1.0, 0.0, 0.0, 0.0]
 
 vfi_array:
-  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
     entity_environment: ["x_inertial"]
     entity_robot: ["rline"]
     entity_environment_primitive_type: "LINE_ANGLE"
@@ -61,7 +69,8 @@ vfi_array:
     vfi_gain: 1.0
     direction: "SAFE_ZONE"
     tag: "C1"
-  - vfi_type: "ROBOT_TO_ROBOT"
+  -
+    vfi_type: "ROBOT_TO_ROBOT"
     entity_one: ["r_base_sphere"]
     entity_two: ["rsphere"]
     entity_one_primitive_type: "POINT"
@@ -71,7 +80,8 @@ vfi_array:
     vfi_gain: 1.0
     direction: "RESTRICTED_ZONE"
     tag: "C2"
-  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
     entity_environment: ["Plane"]
     entity_robot: ["rsphere"]
     entity_environment_primitive_type: "PLANE"
@@ -81,7 +91,8 @@ vfi_array:
     vfi_gain: 1.0
     direction: "RESTRICTED_ZONE"
     tag: "C3"
-  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
     entity_environment: ["Cylinder"]
     entity_robot: ["rsphere"]
     entity_environment_primitive_type: "LINE"
@@ -91,7 +102,8 @@ vfi_array:
     vfi_gain: 2.0
     direction: "RESTRICTED_ZONE"
     tag: "C4"
-  - vfi_type: "ENVIRONMENT_TO_ROBOT"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
     entity_environment: ["obs_sphere"]
     entity_robot: ["rsphere"]
     entity_environment_primitive_type: "POINT"
