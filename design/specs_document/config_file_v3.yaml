@@ -7,7 +7,8 @@ metadata:
   source: "panda_example.ttt"
 
 robots:
-  - robot_index: 1
+  -
+    robot_index: 1
     name: "Franka"
     dim_configuration: 7
 

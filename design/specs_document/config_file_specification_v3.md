@@ -46,7 +46,8 @@ metadata:
   source: "..."
 
 robots:
-  - robot_index: 1
+  -
+    robot_index: 1
     name: "..."
     dim_configuration: 7
 
@@ -90,9 +91,10 @@ vfi_array:
 ### 2.1 Writing style
 
 - Mappings (`pose`, `offset`, entities, VFIs) are written in YAML block style.
-- In `environment_entities`, `robot_entities`, and `vfi_array`, each `-` is
-  written on its own line, and the parameters of the element go on the lines
-  below it. This separates the elements visually, as in V2:
+- In every list of mappings (`robots`, `environment_entities`, `robot_entities`,
+  and `vfi_array`), each `-` is written on its own line, and the parameters of
+  the element go on the lines below it. This separates the elements visually,
+  as in V2:
 
   ```yaml
   robot_entities:
