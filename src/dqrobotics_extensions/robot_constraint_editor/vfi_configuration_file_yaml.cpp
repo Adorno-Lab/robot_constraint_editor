@@ -24,9 +24,13 @@
 #include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp>
 #include <dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_v3.hpp>
 #include <array>
+#include <charconv>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <sstream>
+#include <system_error>
+#include <variant>
 #include <yaml-cpp/yaml.h>
 #include <dqrobotics_extensions/robot_constraint_editor/utils.hpp>
 
@@ -465,6 +469,203 @@ public:
         document_ = document;
     }
 
+    /**
+     * @brief _to_yaml_double returns the shortest representation of a double that is recovered
+     *        exactly when it is read (Section 2.1). Integral values are written with a decimal point.
+     */
+    std::string _to_yaml_double(const double& value)
+    {
+        std::array<char, 32> buffer;
+        const auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+        if (result.ec != std::errc())
+            throw std::runtime_error("Cannot convert the value into a string.");
+        std::string text(buffer.data(), result.ptr);
+        if (text.find_first_of(".eEn") == std::string::npos) // 'n' detects nan and inf
+            text += ".0";
+        return text;
+    }
+
+    /**
+     * @brief _quote returns a YAML double-quoted string.
+     */
+    std::string _quote(const std::string& text)
+    {
+        std::string quoted = "\"";
+        for (const char& c : text)
+        {
+            switch (c) {
+            case '"':  quoted += "\\\""; break;
+            case '\\': quoted += "\\\\"; break;
+            case '\n': quoted += "\\n"; break;
+            case '\t': quoted += "\\t"; break;
+            default:   quoted += c;
+            }
+        }
+        return quoted + "\"";
+    }
+
+    /**
+     * @brief _flow_list returns a YAML flow sequence of quoted strings (e.g., ["a", "b"]).
+     */
+    std::string _flow_list(const std::vector<std::string>& values)
+    {
+        std::string list = "[";
+        for (std::size_t i = 0; i < values.size(); ++i)
+            list += (i > 0 ? ", " : "") + _quote(values.at(i));
+        return list + "]";
+    }
+
+    /**
+     * @brief _flow_list returns a YAML flow sequence of numbers (e.g., [1.0, 0.5]).
+     */
+    template<std::size_t N>
+    std::string _flow_list(const std::array<double, N>& values)
+    {
+        std::string list = "[";
+        for (std::size_t i = 0; i < N; ++i)
+            list += (i > 0 ? ", " : "") + _to_yaml_double(values.at(i));
+        return list + "]";
+    }
+
+    /**
+     * @brief _write_pose writes a pose or offset in the form given by format (Section 5.1).
+     * @param out The output stream.
+     * @param key "pose" or "offset".
+     * @param pose The pose.
+     * @param format The form used to write the pose.
+     */
+    void _write_pose(std::ostream& out, const std::string& key, const POSE& pose, const POSE_FORMAT& format)
+    {
+        if (format == POSE_FORMAT::UNIT_DUAL_QUATERNION)
+        {
+            const Eigen::Matrix<double, 8, 1> x = DQ_robotics::vec8(VFIConfigurationFileV3::pose_to_dq(pose));
+            std::array<double, 8> coefficients;
+            for (std::size_t i = 0; i < coefficients.size(); ++i)
+                coefficients.at(i) = x(i);
+            out << "    " << key << ": " << _flow_list(coefficients) << "\n";
+        }
+        else
+        {
+            out << "    " << key << ":\n";
+            out << "      translation: " << _flow_list(pose.translation) << "\n";
+            out << "      rotation:    " << _flow_list(pose.rotation) << "\n";
+        }
+    }
+
+    /**
+     * @brief _write_vfi_parameters writes the parameters shared by all VFI types, except vfi_type.
+     */
+    void _write_vfi_parameters(std::ostream& out, const BASE_DATA& data)
+    {
+        out << "    safe_distance: " << _to_yaml_double(data.safe_distance) << "\n";
+        out << "    buffer: " << _to_yaml_double(data.buffer) << "\n";
+        out << "    vfi_gain: " << _to_yaml_double(data.vfi_gain) << "\n";
+        out << "    direction: " << _quote(data.direction) << "\n";
+        out << "    tag: " << _quote(data.tag) << "\n";
+    }
+
+    /**
+     * @brief _write_v3 writes a version 3 file using the writing style of Section 2.1.
+     * @param document The document to write. It must be valid.
+     * @param out The output stream.
+     */
+    void _write_v3(const DOCUMENT_V3& document, std::ostream& out)
+    {
+        out << "vfi_file_version: 3\n";
+        out << "zero_indexed: " << bool2string(document.zero_indexed) << "\n";
+
+        // metadata (optional): only the fields that are defined
+        const METADATA& metadata = document.metadata;
+        if (!metadata.description.empty() || !metadata.generated_by.empty() || !metadata.source.empty())
+        {
+            out << "\nmetadata:\n";
+            if (!metadata.description.empty())
+                out << "  description: " << _quote(metadata.description) << "\n";
+            if (!metadata.generated_by.empty())
+                out << "  generated_by: " << _quote(metadata.generated_by) << "\n";
+            if (!metadata.source.empty())
+                out << "  source: " << _quote(metadata.source) << "\n";
+        }
+
+        out << "\nrobots:\n";
+        for (const auto& robot : document.robots)
+        {
+            out << "  -\n";
+            out << "    robot_index: " << robot.robot_index << "\n";
+            out << "    name: " << _quote(robot.name) << "\n";
+            out << "    dim_configuration: " << robot.dim_configuration << "\n";
+        }
+
+        // environment_entities (optional)
+        if (!document.environment_entities.empty())
+        {
+            out << "\nenvironment_entities:\n";
+            for (const auto& entity : document.environment_entities)
+            {
+                out << "  -\n";
+                out << "    name: " << _quote(entity.name) << "\n";
+                _write_pose(out, "pose", entity.pose, document.pose_format);
+                out << "    attached_direction: " << _quote(entity.attached_direction) << "\n";
+            }
+        }
+
+        out << "\nrobot_entities:" << (document.robot_entities.empty() ? " []\n" : "\n");
+        for (const auto& entity : document.robot_entities)
+        {
+            out << "  -\n";
+            out << "    name: " << _quote(entity.name) << "\n";
+            out << "    robot_index: " << entity.robot_index << "\n";
+            out << "    joint_index: " << entity.joint_index << "\n";
+            _write_pose(out, "offset", entity.offset, document.pose_format);
+            out << "    attached_direction: " << _quote(entity.attached_direction) << "\n";
+        }
+
+        out << "\nvfi_array:" << (document.vfi_array.empty() ? " []\n" : "\n");
+        for (const auto& vfi : document.vfi_array)
+        {
+            out << "  -\n";
+            std::visit([&](const auto& data) {
+                using T = std::decay_t<decltype(data)>;
+                out << "    vfi_type: " << _quote(data.vfi_type) << "\n";
+                if constexpr (std::is_same_v<T, ENVIRONMENT_TO_ROBOT_DATA_V3>) {
+                    out << "    entity_environment: " << _flow_list(data.entity_environment) << "\n";
+                    out << "    entity_robot: " << _flow_list(data.entity_robot) << "\n";
+                    out << "    entity_environment_primitive_type: " << _quote(data.entity_environment_primitive_type) << "\n";
+                    out << "    entity_robot_primitive_type: " << _quote(data.entity_robot_primitive_type) << "\n";
+                } else if constexpr (std::is_same_v<T, ROBOT_TO_ROBOT_DATA_V3>) {
+                    out << "    entity_one: " << _flow_list(data.entity_one) << "\n";
+                    out << "    entity_two: " << _flow_list(data.entity_two) << "\n";
+                    out << "    entity_one_primitive_type: " << _quote(data.entity_one_primitive_type) << "\n";
+                    out << "    entity_two_primitive_type: " << _quote(data.entity_two_primitive_type) << "\n";
+                }
+                _write_vfi_parameters(out, data);
+            }, vfi);
+        }
+    }
+
+    /**
+     * @brief _write_file writes the content into a file. The directory is created if it does not exist.
+     */
+    void _write_file(const std::string& content, const std::string& config_file)
+    {
+        if (config_file.empty())
+            throw std::runtime_error("config_file path cannot be empty!");
+
+        const std::filesystem::path directory = std::filesystem::path(config_file).parent_path();
+        if (!directory.empty() && !std::filesystem::exists(directory)) {
+            std::cout << "Creating directory: " << directory << std::endl;
+            std::filesystem::create_directories(directory);
+        }
+
+        std::ofstream file(config_file);
+        if (!file.is_open())
+            throw std::runtime_error("Cannot open file for writing: " + config_file);
+        file << content;
+        file.close();
+        if (file.fail())
+            throw std::runtime_error("Cannot write the file: " + config_file);
+    }
+
 };
 
 /**
@@ -537,6 +738,40 @@ bool VFIConfigurationFileYaml::is_zero_indexed() const
 {
     return impl_->zero_indexed_;
 }
+
+/**
+ * @brief VFIConfigurationFileYaml::save_document saves a configuration file. The version is given by the
+ *        document type. A DOCUMENT_V2 is saved with save_data(). A DOCUMENT_V3 is validated before the
+ *        file is opened, so an invalid document does not modify the file.
+ * @param document The DOCUMENT_V2 or DOCUMENT_V3 to save.
+ * @param config_file The desired name of the file including its path and format.
+ */
+void VFIConfigurationFileYaml::save_document(const Document& document, const std::string& config_file)
+{
+    if (const auto* document_v2 = std::get_if<DOCUMENT_V2>(&document))
+    {
+        save_data(document_v2->vfi_array, 2, document_v2->zero_indexed, config_file);
+        return;
+    }
+
+    try {
+        const DOCUMENT_V3& document_v3 = std::get<DOCUMENT_V3>(document);
+        VFIConfigurationFileV3::validate(document_v3);
+
+        std::ostringstream content;
+        impl_->_write_v3(document_v3, content);
+        impl_->_write_file(content.str(), config_file);
+
+        std::cout << "Successfully saved " << document_v3.vfi_array.size()
+                  << " VFI entries to: " << config_file << std::endl;
+
+    } catch (const std::filesystem::filesystem_error& e) {
+        throw std::runtime_error("Filesystem error in save_document: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        throw std::runtime_error("Error in save_document: " + std::string(e.what()));
+    }
+}
+
 
 /**
  * @brief VFIConfigurationFileYaml::save_data saves a configuration file containing the VFI constraints.

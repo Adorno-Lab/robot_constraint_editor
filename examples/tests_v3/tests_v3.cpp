@@ -79,6 +79,8 @@ vfi_array:
 )";
 
 const std::string TMP_FILE = "tests_v3_tmp.yaml";
+const std::string SAVED_FILE = "tests_v3_saved.yaml";
+const std::string SAVED_FILE_2 = "tests_v3_saved_2.yaml";
 
 int failures = 0;
 
@@ -98,6 +100,34 @@ void write_file(const std::string& content)
 {
     std::ofstream file(TMP_FILE);
     file << content;
+}
+
+std::string read_file(const std::string& name)
+{
+    std::ifstream file(name);
+    std::stringstream content;
+    content << file.rdbuf();
+    return content.str();
+}
+
+bool contains(const std::string& text, const std::string& expected)
+{
+    return text.find(expected) != std::string::npos;
+}
+
+/**
+ * @brief save_and_reload saves a document, loads it again, and returns the loaded document.
+ *        It also checks that saving the loaded document gives the same file (no data is lost).
+ */
+File::DOCUMENT_V3 save_and_reload(const File::DOCUMENT_V3& document, const std::string& description)
+{
+    auto file = std::make_shared<VFIConfigurationFileYaml>();
+    file->save_document(document, SAVED_FILE);
+    file->load_data(SAVED_FILE);
+    const auto reloaded = std::get<File::DOCUMENT_V3>(file->get_document());
+    file->save_document(reloaded, SAVED_FILE_2);
+    check(read_file(SAVED_FILE) == read_file(SAVED_FILE_2), description + ": save -> load -> save gives the same file");
+    return reloaded;
 }
 
 /**
@@ -224,6 +254,12 @@ void test_unit_dual_quaternion_form()
     check(near(doc.robot_entities.at(2).offset.translation.at(2), 0.10), "p2 offset -> translation [0, 0, 0.10]");
     check(doc.pose_format == File::POSE_FORMAT::UNIT_DUAL_QUATERNION, "Only 8 coefficients -> UNIT_DUAL_QUATERNION");
 
+    const auto reloaded = save_and_reload(doc, "Rotated pose (8 coefficients)");
+    const auto& reloaded_pose = reloaded.environment_entities.at(0).pose;
+    check(reloaded.pose_format == File::POSE_FORMAT::UNIT_DUAL_QUATERNION, "Saved with 8 coefficients");
+    check(near(reloaded_pose.translation.at(0), 1.0) && near(reloaded_pose.translation.at(1), 2.0)
+              && near(reloaded_pose.translation.at(2), 3.0) && near(reloaded_pose.rotation.at(0), cos(M_PI/4.0))
+              && near(reloaded_pose.rotation.at(3), sin(M_PI/4.0)), "Rotated pose after save -> load");
 }
 
 void test_invalid_files()
@@ -327,6 +363,90 @@ void test_v2_file()
     check(doc.zero_indexed == file->is_zero_indexed(), "DOCUMENT_V2 zero_indexed");
 }
 
+void test_save_v3()
+{
+    std::cout << "\n--- Save version 3 ---" << std::endl;
+    auto file = std::make_shared<VFIConfigurationFileYaml>();
+    file->load_data("config_file_v3.yaml");
+    const auto original = std::get<File::DOCUMENT_V3>(file->get_document());
+
+    // Translation and rotation form
+    const auto reloaded = save_and_reload(original, "Example file");
+    const std::string text = read_file(SAVED_FILE);
+    check(reloaded.pose_format == File::POSE_FORMAT::TRANSLATION_ROTATION, "Saved with translation and rotation");
+    check(reloaded.environment_entities.at(3).pose.translation == original.environment_entities.at(3).pose.translation
+              && reloaded.robot_entities.at(2).offset.translation == original.robot_entities.at(2).offset.translation,
+          "Poses are recovered exactly");
+    check(contains(text, "vfi_file_version: 3\nzero_indexed: false\n\nmetadata:\n  description: "), "Layout: header and metadata");
+    check(contains(text, "\nrobots:\n  -\n    robot_index: 1\n    name: \"Franka\"\n    dim_configuration: 7\n"), "Layout: robots");
+    check(contains(text, "  -\n    name: \"Cylinder\"\n    pose:\n      translation: [0.45, -0.2, 0.3]\n"
+                         "      rotation:    [1.0, 0.0, 0.0, 0.0]\n    attached_direction: \"k_\"\n"),
+          "Layout: environment entity (default attached_direction is written)");
+    check(contains(text, "    joint_index: 1\n    offset:\n      translation: [0.0, 0.0, -0.1]\n"), "Layout: robot entity");
+    check(contains(text, "\nvfi_array:\n  -\n    vfi_type: \"ENVIRONMENT_TO_ROBOT\"\n    entity_environment: [\"x_inertial\"]\n"),
+          "Layout: vfi_array");
+    check(contains(text, "    safe_distance: 5.0\n    buffer: 0.0\n    vfi_gain: 1.0\n"), "Numbers: integral values with .0");
+    check(contains(text, "    safe_distance: 0.05\n"), "Numbers: shortest exact representation");
+
+    // Unit dual quaternion form
+    auto document = original;
+    document.pose_format = File::POSE_FORMAT::UNIT_DUAL_QUATERNION;
+    const auto reloaded_dq = save_and_reload(document, "Example file (8 coefficients)");
+    const std::string text_dq = read_file(SAVED_FILE);
+    check(contains(text_dq, "    pose: [1.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.125, 0.225]\n") && !contains(text_dq, "translation:"),
+          "Layout: 8 coefficients");
+    check(reloaded_dq.pose_format == File::POSE_FORMAT::UNIT_DUAL_QUATERNION
+              && near(reloaded_dq.environment_entities.at(2).pose.translation.at(0), 0.45)
+              && near(reloaded_dq.robot_entities.at(2).offset.translation.at(2), -0.1),
+          "Poses after save -> load (8 coefficients)");
+
+    // Strings with quotes, backslashes, and new lines
+    document = original;
+    document.metadata.description = "a \"quoted\" \\ text\nsecond line";
+    document.robots.at(0).name = "Fr\"anka";
+    std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(document.vfi_array.at(0)).tag = "C\"1";
+    const auto reloaded_strings = save_and_reload(document, "Special characters");
+    check(reloaded_strings.metadata.description == document.metadata.description
+              && reloaded_strings.robots.at(0).name == "Fr\"anka"
+              && std::get<File::ENVIRONMENT_TO_ROBOT_DATA_V3>(reloaded_strings.vfi_array.at(0)).tag == "C\"1",
+          "Special characters are recovered");
+
+    // Optional sections are omitted
+    document = original;
+    document.metadata = File::METADATA{};
+    document.environment_entities.clear();
+    document.vfi_array = {original.vfi_array.at(1)}; // ROBOT_TO_ROBOT only
+    const auto reloaded_optional = save_and_reload(document, "Without optional sections");
+    const std::string text_optional = read_file(SAVED_FILE);
+    check(!contains(text_optional, "metadata:") && !contains(text_optional, "environment_entities:")
+              && reloaded_optional.environment_entities.empty() && reloaded_optional.vfi_array.size() == 1,
+          "metadata and environment_entities are omitted when empty");
+
+    // An invalid document is rejected without modifying the file
+    write_file("original content");
+    document = original;
+    std::get<File::ROBOT_TO_ROBOT_DATA_V3>(document.vfi_array.at(1)).tag = "C1";
+    bool rejected = false;
+    try { file->save_document(document, TMP_FILE); } catch (const std::runtime_error& e) {
+        rejected = contains(e.what(), "the tag is already used");
+    }
+    check(rejected && read_file(TMP_FILE) == "original content", "Invalid document is rejected and the file is not modified");
+
+    bool empty_path_rejected = false;
+    try { file->save_document(original, ""); } catch (const std::runtime_error&) { empty_path_rejected = true; }
+    check(empty_path_rejected, "Empty path is rejected");
+}
+
+void test_save_v2()
+{
+    std::cout << "\n--- Save version 2 ---" << std::endl;
+    auto file = std::make_shared<VFIConfigurationFileYaml>();
+    file->load_data("config_file.yaml");
+    file->save_document(file->get_document(), SAVED_FILE);
+    file->save_data(file->get_data(), 2, file->is_zero_indexed(), SAVED_FILE_2);
+    check(read_file(SAVED_FILE) == read_file(SAVED_FILE_2), "save_document(DOCUMENT_V2) is equivalent to save_data()");
+}
+
 } // namespace
 
 int main()
@@ -337,11 +457,14 @@ int main()
         test_unit_dual_quaternion_form();
         test_invalid_files();
         test_v2_file();
+        test_save_v3();
+        test_save_v2();
     } catch (const std::exception& e) {
         std::cout << "[FAIL] Unexpected exception: " << e.what() << std::endl;
         failures++;
     }
-    std::remove(TMP_FILE.c_str());
+    for (const auto& name : {TMP_FILE, SAVED_FILE, SAVED_FILE_2})
+        std::remove(name.c_str());
 
     std::cout << "\n" << (failures == 0 ? "All tests passed." : std::to_string(failures) + " test(s) failed.")
               << std::endl;

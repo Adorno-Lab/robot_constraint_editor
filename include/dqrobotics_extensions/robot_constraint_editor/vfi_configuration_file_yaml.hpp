@@ -47,6 +47,7 @@ public:
                    const int& vfi_file_version,
                    const bool& zero_indexed,
                    const std::string& config_file) override;
+    void save_document(const Document& document, const std::string& config_file) override;
 
 };
 }

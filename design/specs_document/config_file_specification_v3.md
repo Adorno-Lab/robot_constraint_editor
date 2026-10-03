@@ -116,10 +116,15 @@ vfi_array:
 - Flow style (`[...]`) is used only for short lists of values: `translation`,
   `rotation`, the 8-element form of `pose`/`offset`, and the entity lists of the
   `vfi_array`.
-- Writers must use 17 significant digits for the coefficients of `pose`/`offset`
-  (i.e., `std::numeric_limits<double>::max_digits10`), so that the values are
-  recovered exactly after a save/load cycle and remain unit within
-  `DQ_threshold` (Section 5.1.3).
+- Writers must write each floating-point number with the shortest
+  representation that is recovered exactly when it is read (e.g., `std::to_chars`),
+  which has at most 17 significant digits
+  (`std::numeric_limits<double>::max_digits10`). Thus, the values are recovered
+  exactly after a save/load cycle, and the poses remain unit within
+  `DQ_threshold` (Section 5.1.3). Integral values are written with a decimal
+  point (e.g., `1.0`).
+- Writers write `attached_direction` for every entity, even if it takes the
+  default value.
 
 ## 3. Header
 
@@ -211,14 +216,15 @@ normalized.
 
 Therefore, the coefficients must be written with enough digits. For instance, the
 rotation of 90 degrees about the z-axis must be written as
-`[0.70710678118654757, 0.0, 0.0, 0.70710678118654757]`, since
+`[0.7071067811865476, 0.0, 0.0, 0.7071067811865476]`, since
 `[0.7071067812, 0.0, 0.0, 0.7071067812]` is not unit within `DQ_threshold`.
 
 #### 5.1.4 Writing
 
 The robot_constraint_editor writes the mapping form (Section 5.1.1) by default,
 and may provide an option to write the sequence form (Section 5.1.2). A single
-form is used in the whole file.
+form is used in the whole file. When a file is loaded, the sequence form is kept
+only if every `pose`/`offset` of the file uses it.
 
 ### 5.2 `attached_direction`
 

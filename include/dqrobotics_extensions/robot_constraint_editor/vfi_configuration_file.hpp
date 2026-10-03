@@ -179,6 +179,15 @@ public:
                            const bool& zero_indexed,
                            const std::string& config_file) = 0;
 
+    /**
+     * @brief save_document saves a configuration file. The version is given by the document type.
+     *        A DOCUMENT_V3 is validated before the file is opened, so an invalid document does not
+     *        modify the file.
+     * @param document The DOCUMENT_V2 or DOCUMENT_V3 to save.
+     * @param config_file The desired name of the file including its path and format.
+     */
+    virtual void save_document(const Document& document, const std::string& config_file) = 0;
+
 };
 
 
