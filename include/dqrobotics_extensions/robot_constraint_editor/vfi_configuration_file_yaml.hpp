@@ -40,12 +40,14 @@ public:
     // Override from VFIConfigurationFile
     void load_data(const std::string& config_file) override;
     std::vector<VFIConfigurationFile::Data> get_data() const override;
+    VFIConfigurationFile::Document get_document() const override;
     int get_vfi_file_version() const override;
     bool is_zero_indexed() const override;
     void save_data(const std::vector<Data>& data,
                    const int& vfi_file_version,
                    const bool& zero_indexed,
                    const std::string& config_file) override;
+    void save_document(const Document& document, const std::string& config_file) override;
 
 };
 }

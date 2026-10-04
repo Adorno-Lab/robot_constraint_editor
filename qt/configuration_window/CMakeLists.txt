@@ -54,12 +54,15 @@ endif()
 include_directories(../../include)
 add_library(vfi_config_yaml
            ../../src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.cpp
+           ../../src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_v3.cpp
            ../../src/dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.cpp
            ../../src/dqrobotics_extensions/robot_constraint_editor/utils.cpp
 )
 
 target_link_libraries(vfi_config_yaml
            yaml-cpp::yaml-cpp
+           Eigen3::Eigen
+           dqrobotics
 )
 
 target_link_libraries(configuration_window

@@ -1,0 +1,15 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Transitive PUBLIC dependencies that consumers linking against
+# robot_constraint_editor::robot_constraint_editor also need resolvable.
+# dqrobotics is intentionally NOT re-found here: it has no CMake package config
+# of its own (see the find_library() note in CMakeLists.txt), so its absolute
+# paths are already part of the exported target. yaml-cpp is a PRIVATE dependency
+# of the shared library, so consumers do not need it.
+find_dependency(Eigen3 REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/robot_constraint_editorTargets.cmake")
+
+check_required_components(robot_constraint_editor)

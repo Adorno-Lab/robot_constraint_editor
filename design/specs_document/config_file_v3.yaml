@@ -1,0 +1,116 @@
+vfi_file_version: 3
+zero_indexed: false
+
+metadata:
+  description: "Panda example constraints (numerical values are illustrative)"
+  generated_by: "robot_constraint_editor"
+  source: "panda_example.ttt"
+
+robots:
+  -
+    robot_index: 1
+    name: "Franka"
+    dim_configuration: 7
+
+environment_entities:
+  -
+    name: "x_inertial"
+    pose:
+      translation: [0.0, 0.0, 0.0]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+    attached_direction: "k_"
+  -
+    name: "Plane"
+    pose:
+      translation: [0.0, 0.0, 0.05]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+    attached_direction: "k_"
+  -
+    name: "Cylinder"
+    pose:
+      translation: [0.45, -0.20, 0.30]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+  -
+    name: "obs_sphere"
+    pose: [1.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.125, 0.225]
+
+robot_entities:
+  -
+    name: "rline"
+    robot_index: 1
+    joint_index: 7
+    offset:
+      translation: [0.0, 0.0, 0.0]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+    attached_direction: "k_"
+  -
+    name: "rsphere"
+    robot_index: 1
+    joint_index: 7
+    offset:
+      translation: [0.0, 0.0, 0.05]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+  -
+    name: "r_base_sphere"
+    robot_index: 1
+    joint_index: 1
+    offset:
+      translation: [0.0, 0.0, -0.10]
+      rotation:    [1.0, 0.0, 0.0, 0.0]
+
+vfi_array:
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
+    entity_environment: ["x_inertial"]
+    entity_robot: ["rline"]
+    entity_environment_primitive_type: "LINE_ANGLE"
+    entity_robot_primitive_type: "LINE_ANGLE"
+    safe_distance: 5
+    buffer: 0.0
+    vfi_gain: 1.0
+    direction: "SAFE_ZONE"
+    tag: "C1"
+  -
+    vfi_type: "ROBOT_TO_ROBOT"
+    entity_one: ["r_base_sphere"]
+    entity_two: ["rsphere"]
+    entity_one_primitive_type: "POINT"
+    entity_two_primitive_type: "POINT"
+    safe_distance: 0.3
+    buffer: 0.0
+    vfi_gain: 1.0
+    direction: "RESTRICTED_ZONE"
+    tag: "C2"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
+    entity_environment: ["Plane"]
+    entity_robot: ["rsphere"]
+    entity_environment_primitive_type: "PLANE"
+    entity_robot_primitive_type: "POINT"
+    safe_distance: 0.05
+    buffer: 0.0
+    vfi_gain: 1.0
+    direction: "RESTRICTED_ZONE"
+    tag: "C3"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
+    entity_environment: ["Cylinder"]
+    entity_robot: ["rsphere"]
+    entity_environment_primitive_type: "LINE"
+    entity_robot_primitive_type: "POINT"
+    safe_distance: 0.1
+    buffer: 0.0
+    vfi_gain: 2.0
+    direction: "RESTRICTED_ZONE"
+    tag: "C4"
+  -
+    vfi_type: "ENVIRONMENT_TO_ROBOT"
+    entity_environment: ["obs_sphere"]
+    entity_robot: ["rsphere"]
+    entity_environment_primitive_type: "POINT"
+    entity_robot_primitive_type: "POINT"
+    safe_distance: 0.1
+    buffer: 0.0
+    vfi_gain: 2.0
+    direction: "RESTRICTED_ZONE"
+    tag: "C5"

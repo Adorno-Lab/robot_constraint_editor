@@ -1,68 +1,121 @@
-cmake_minimum_required(VERSION 3.5...3.26)
+cmake_minimum_required(VERSION 3.16)
 
-option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+project(robot_constraint_editor
+    VERSION 0.1.0
+    DESCRIPTION "Library to create, edit, and validate the YAML configuration files of the robot_constraint_manager"
+    LANGUAGES CXX
+)
 
-project(robot_constraint_editor LANGUAGES CXX)
+# ---------------------------------------------------------------------------
+# Project-wide settings
+# ---------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
 
+# Eigen3 is header-only; Eigen3::Eigen is the imported target its Config file provides.
 find_package(Eigen3 REQUIRED)
 
-if(UNIX AND NOT APPLE)
-    FIND_PACKAGE(Eigen3 REQUIRED)
-    INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
-    ADD_COMPILE_OPTIONS(-Werror=return-type -Wall -Wextra -Wmissing-declarations -Wredundant-decls -Woverloaded-virtual)
+# yaml-cpp ships a CMake package config that provides the yaml-cpp::yaml-cpp target.
+find_package(yaml-cpp REQUIRED)
+
+# DQ Robotics (https://dqrobotics.github.io) does not ship a CMake package config.
+# find_library() and find_path() locate it, giving absolute paths that are embedded
+# in the exported target.
+find_library(DQROBOTICS_LIBRARY dqrobotics)
+find_path(DQROBOTICS_INCLUDE_DIR dqrobotics/DQ.h)
+if(NOT DQROBOTICS_LIBRARY OR NOT DQROBOTICS_INCLUDE_DIR)
+    message(FATAL_ERROR
+        "DQ Robotics not found. Install DQ Robotics "
+        "(see https://dqrobotics.github.io) before configuring robot_constraint_editor."
+    )
 endif()
 
-if (APPLE)
-    INCLUDE_DIRECTORIES(
-           /usr/local/include/
-           /usr/local/include/eigen3
-           # Most recent versions of brew install here
-           /opt/homebrew/include/
-           /opt/homebrew/include/eigen3
-       )
-   ADD_COMPILE_OPTIONS(-Werror=return-type -Wall -Wextra -Wmissing-declarations -Wredundant-decls -Woverloaded-virtual)
-   # The library is installed here when using the regular cmake ., make, sudo make install
-   LINK_DIRECTORIES(
-       /usr/local/lib/
-       /opt/homebrew/lib
-       )
-endif()
-
-
-include_directories(${PROJECT_NAME}  include)
-
+# ---------------------------------------------------------------------------
+# Library
+# ---------------------------------------------------------------------------
 add_library(${PROJECT_NAME} SHARED
     src/dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.cpp
     src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.cpp
+    src/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_v3.cpp
     src/dqrobotics_extensions/robot_constraint_editor/utils.cpp
 )
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-        include
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Werror=return-type -Wall -Wextra -Wmissing-declarations -Wredundant-decls -Woverloaded-virtual>
 )
 
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    ${DQROBOTICS_INCLUDE_DIR}
+)
+
+# The public headers include <dqrobotics/DQ.h>, which includes Eigen.
+# yaml-cpp is used only in the implementation (pImpl).
 target_link_libraries(${PROJECT_NAME}
-        yaml-cpp
+    PUBLIC
+        Eigen3::Eigen
+        ${DQROBOTICS_LIBRARY}
+    PRIVATE
+        yaml-cpp::yaml-cpp
 )
 
-SET_TARGET_PROPERTIES(${PROJECT_NAME}
-    PROPERTIES PUBLIC_HEADER
-    "include/dqrobotics_extensions/robot_constraint_editor/robot_constraint_editor.hpp"
-    )
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+)
 
-INSTALL(TARGETS ${PROJECT_NAME}
-    LIBRARY DESTINATION "lib"
-    PUBLIC_HEADER DESTINATION "include/dqrobotics_extensions/robot_constraint_editor/"
-    PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+# ---------------------------------------------------------------------------
+# Install: headers, library, and the exported CMake package
+# ---------------------------------------------------------------------------
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
-# Other Headers
-INSTALL(FILES
-    include/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file.hpp
-    include/dqrobotics_extensions/robot_constraint_editor/vfi_configuration_file_yaml.hpp
-    include/dqrobotics_extensions/robot_constraint_editor/utils.hpp
-    DESTINATION "include/dqrobotics_extensions/robot_constraint_editor")
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+# How to use
+# find_package(robot_constraint_editor REQUIRED)
+# target_link_libraries(my_target PRIVATE robot_constraint_editor::robot_constraint_editor)

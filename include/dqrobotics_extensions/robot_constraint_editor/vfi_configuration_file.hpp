@@ -22,6 +22,7 @@
 */
 
 #pragma once
+#include <array>
 #include <string>
 #include <vector>
 #include <variant>
@@ -64,6 +65,71 @@ public:
 
     using Data = std::variant<ENVIRONMENT_TO_ROBOT_DATA, ROBOT_TO_ROBOT_DATA>;
 
+    // Version 3 types. See design/specs_document/config_file_specification_v3.md
+
+    // Form used to write the poses/offsets in the file (Section 5.1)
+    enum class POSE_FORMAT{
+        TRANSLATION_ROTATION,   // translation: [x, y, z], rotation: [w, x, y, z]
+        UNIT_DUAL_QUATERNION    // [c1, c2, c3, c4, c5, c6, c7, c8]
+    };
+    struct POSE{
+        std::array<double, 3> translation; // vec3(t)
+        std::array<double, 4> rotation;    // vec4(r)
+    };
+    struct METADATA{
+        std::string description;
+        std::string generated_by;
+        std::string source;
+    };
+    struct ROBOT{
+        int robot_index;
+        std::string name;
+        int dim_configuration;
+    };
+    struct ENVIRONMENT_ENTITY{
+        std::string name;
+        POSE pose;
+        std::string attached_direction = "k_"; //Default value
+    };
+    struct ROBOT_ENTITY{
+        std::string name;
+        int robot_index;
+        int joint_index;
+        POSE offset;
+        std::string attached_direction = "k_"; //Default value
+    };
+    struct ENVIRONMENT_TO_ROBOT_DATA_V3 : BASE_DATA{
+        std::vector<std::string> entity_environment;
+        std::vector<std::string> entity_robot;
+        std::string entity_environment_primitive_type;
+        std::string entity_robot_primitive_type;
+    };
+    struct ROBOT_TO_ROBOT_DATA_V3 : BASE_DATA{
+        std::vector<std::string> entity_one;
+        std::vector<std::string> entity_two;
+        std::string entity_one_primitive_type;
+        std::string entity_two_primitive_type;
+    };
+
+    using DataV3 = std::variant<ENVIRONMENT_TO_ROBOT_DATA_V3, ROBOT_TO_ROBOT_DATA_V3>;
+
+    // Complete content of a configuration file. The version is given by the variant alternative.
+    struct DOCUMENT_V2{
+        bool zero_indexed;
+        std::vector<Data> vfi_array;
+    };
+    struct DOCUMENT_V3{
+        bool zero_indexed;
+        METADATA metadata;
+        std::vector<ROBOT> robots;
+        std::vector<ENVIRONMENT_ENTITY> environment_entities;
+        std::vector<ROBOT_ENTITY> robot_entities;
+        std::vector<DataV3> vfi_array;
+        POSE_FORMAT pose_format = POSE_FORMAT::TRANSLATION_ROTATION; //Default value
+    };
+
+    using Document = std::variant<DOCUMENT_V2, DOCUMENT_V3>;
+
 protected:
     VFIConfigurationFile() = default;
 
@@ -81,6 +147,12 @@ public:
      * @return The desired data vector.
      */
     virtual std::vector<Data>  get_data() const = 0;
+
+    /**
+     * @brief get_document gets the complete content of the loaded configuration file.
+     * @return A DOCUMENT_V2 or a DOCUMENT_V3, depending on the file version.
+     */
+    virtual Document get_document() const = 0;
 
     /**
      * @brief get_vfi_file_version gets the configuration file version.
@@ -106,6 +178,15 @@ public:
                            const int& vfi_file_version,
                            const bool& zero_indexed,
                            const std::string& config_file) = 0;
+
+    /**
+     * @brief save_document saves a configuration file. The version is given by the document type.
+     *        A DOCUMENT_V3 is validated before the file is opened, so an invalid document does not
+     *        modify the file.
+     * @param document The DOCUMENT_V2 or DOCUMENT_V3 to save.
+     * @param config_file The desired name of the file including its path and format.
+     */
+    virtual void save_document(const Document& document, const std::string& config_file) = 0;
 
 };
 
