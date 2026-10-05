@@ -32,7 +32,7 @@ The configuration file is composed of the following elements:
 
 \* Required if at least one VFI of type `"ENVIRONMENT_TO_ROBOT"` is defined.
 
-A complete example is provided in [config_file_v3.yaml](config_file_v3.yaml).
+A complete example is provided in [config_file_v3.yaml](https://github.com/Adorno-Lab/robot_constraint_editor/blob/main/design/specs_document/config_file_v3.yaml).
 
 ## 2. File structure
 

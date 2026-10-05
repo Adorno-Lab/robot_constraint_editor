@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/Written_in-C%2B%2B17-blue)![GitHub License](https://img.shields.io/github/license/Adorno-Lab/robot_constraint_editor?color=orange)![Static Badge](https://img.shields.io/badge/status-experimental-red)
+![Static Badge](https://img.shields.io/badge/Written_in-C%2B%2B17-blue)![GitHub License](https://img.shields.io/github/license/Adorno-Lab/robot_constraint_editor?color=orange)![Static Badge](https://img.shields.io/badge/status-experimental-red)[![Docs](https://img.shields.io/badge/docs-GitHub_Pages-green)](https://adorno-lab.github.io/robot_constraint_editor/)
 
 # robot_constraint_editor
 A graphical editor to create and manage configuration files for the [robot_constraint_manager](https://github.com/Adorno-Lab/robot_constraint_manager).
@@ -113,4 +113,4 @@ rce.rename_entity("rsphere", "tool_sphere");          // The VFIs that use the e
 rce.save_document("config_file_v3_edited.yaml");      // Validated before the file is written
 ```
 
-See [examples/minimal_example](examples/minimal_example) for complete examples of versions 2 and 3.
+See [examples/minimal_example](https://github.com/Adorno-Lab/robot_constraint_editor/tree/main/examples/minimal_example) for complete examples of versions 2 and 3.

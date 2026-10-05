@@ -34,7 +34,7 @@ std::string join_vector(const std::vector<std::string>& vec, const std::string& 
  * @param vfi_file_version
  * @param zero_indexed
  */
-void VFIConfigurationFileData::show_data(const std::vector<VFIConfigurationFile::Data> &data,
+void VFIConfigurationFileData::show_data(const std::vector<DQ_robotics_extensions::VFIConfigurationFile::Data> &data,
                                             const int& vfi_file_version,
                                             const bool& zero_indexed)
 {
