@@ -670,8 +670,6 @@ public:
 
 /**
  * @brief VFIConfigurationFileYaml::VFIConfigurationFileYaml ctor of the class.
- * @param config_file The configuration YAML file. This path must contain the file and its format.
- *                    Example: "/path_to_the_file/config_file.yaml"
  */
 VFIConfigurationFileYaml::VFIConfigurationFileYaml()
 {
@@ -776,7 +774,9 @@ void VFIConfigurationFileYaml::save_document(const Document& document, const std
 /**
  * @brief VFIConfigurationFileYaml::save_data saves a configuration file containing the VFI constraints.
  * @param data the vector that contains the VFI configurations
- * @param The desired name of the file including its path and format.
+ * @param vfi_file_version The desired format version
+ * @param zero_indexed To define if the data uses a zero-indexed convention.
+ * @param config_file The desired name of the file including its path and format.
  */
 void VFIConfigurationFileYaml::save_data(const std::vector<Data> &data,
                                          const int &vfi_file_version,
